@@ -45,6 +45,7 @@ struct pointOnMatrix {
   byte columnCoordinate;
 };
 
+
 unsigned long lastMillis = 0;
 unsigned const int screenMoves = 1000;  // In miliseconds, every how much will the menace grow
 
@@ -60,8 +61,15 @@ unsigned int lastDownButtonValue = LOW;
 
 
 
-unsigned byte leftButtonPushed = 0;
-unsigned byte rightButtonPushed = 0;
+byte leftButtonPushed = 0;
+byte rightButtonPushed = 0;
+
+// ---------------------------------------------
+// ---------------- GAME VARIABLES -------------
+// ---------------------------------------------
+byte carPosition = 3;                       // Car position on the bootom line of the LED matrix (so the column)
+byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
+byte probaApparitionLigne = 50;             // Probability of a new line appearing when possible
 
 
 
@@ -79,6 +87,9 @@ void setup() {
   pinMode(rightButton, INPUT);
   pinMode(aButton, INPUT);
   pinMode(bButton, INPUT);
+
+  // Initializing randomness
+  randomSeed(analogRead(0));
 }
 
 void loop() {
@@ -86,13 +97,30 @@ void loop() {
 if(millis() - lastMillis > screenMoves) {
 
   if(leftButtonPushed == 1) {
-    
+    if(carPosition > 0) {
+      carPosition--;
+    }
   }
 
   if(rightButtonPushed == 1) {
-    
+    if(carPosition <5) {
+      carPosition++;
+    }
   }
 
+  
+  if(ticker == 0) {
+    if(random(100) < probaApparitionLigne) {
+      // Créer une ligne
+      // Bit par bit
+    }
+  }
+  
+
+  if(ticker > 0) {
+    ticker--;
+  }
+  
   lastMillis = millis();
   leftButtonPushed = 0;
   rightButtonPushed = 0;
