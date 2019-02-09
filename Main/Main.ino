@@ -46,7 +46,7 @@ struct pointOnMatrix {
 };
 
 unsigned long lastMillis = 0;
-unsigned const int growthSpeed = 1500;  // In miliseconds, every how much will the menace grow
+unsigned const int screenMoves = 1000;  // In miliseconds, every how much will the menace grow
 
 unsigned int leftButtonValue = LOW;
 unsigned int rightButtonValue = LOW;
@@ -58,6 +58,10 @@ unsigned int lastRightButtonValue = LOW;
 unsigned int lastUpButtonValue = LOW;
 unsigned int lastDownButtonValue = LOW;
 
+
+
+unsigned byte leftButtonPushed = 0;
+unsigned byte rightButtonPushed = 0;
 
 
 
@@ -79,10 +83,20 @@ void setup() {
 
 void loop() {
 
-if(lastMillis - millis() > 500) {
+if(millis() - lastMillis > screenMoves) {
 
+  if(leftButtonPushed == 1) {
+    
+  }
+
+  if(rightButtonPushed == 1) {
+    
+  }
 
   lastMillis = millis();
+  leftButtonPushed = 0;
+  rightButtonPushed = 0;
+  outputDisplay();
 }
 
     // ----------------------------------------------------------
@@ -91,29 +105,34 @@ if(lastMillis - millis() > 500) {
     
     leftButtonValue = analogRead(leftButton);
     if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
-      
+      leftButtonPushed = 1;
+      rightButtonPushed = 0;
     }
     lastLeftButtonValue = leftButtonValue; // And we update what we read just after
 
+    rightButtonValue = analogRead(rightButton);
+    if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
+      leftButtonPushed = 0;
+      rightButtonPushed = 1;
+    }
+    lastRightButtonValue = rightButtonValue; // And we update what we read just after
+
+    /*
     upButtonValue = analogRead(upButton);
     if (upButtonValue < 200 && lastUpButtonValue > 800) { 
       
     }
     lastUpButtonValue = upButtonValue; // And we update what we read just after
-
-    rightButtonValue = analogRead(rightButton);
-    if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
-      
-    }
-    lastRightButtonValue = rightButtonValue; // And we update what we read just after
-
+    */
+    
+    /*
     downButtonValue = analogRead(downButton);
     if (downButtonValue < 200 && lastDownButtonValue > 800) { 
       
     }
     lastDownButtonValue = downButtonValue; // And we update what we read just after
-
-  outputDisplay();
+    */
+    
   delay(1);
 }
 
