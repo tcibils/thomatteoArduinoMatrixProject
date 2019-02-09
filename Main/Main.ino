@@ -92,6 +92,26 @@ void setup() {
   randomSeed(analogRead(0));
 }
 
+
+
+
+/* 
+move player G/D (DONE)
+
+if >0, don’t create line - DONE(N/A)
+if 0, create line one by one - En cours
+
+lower all lines
+add new line
+if player on obstacle, game end
+if player not on obs, nothing
+
+increase line count
+*/
+
+
+
+
 void loop() {
 
 if(millis() - lastMillis > screenMoves) {
@@ -113,6 +133,7 @@ if(millis() - lastMillis > screenMoves) {
     if(random(100) < probaApparitionLigne) {
       // Créer une ligne
       // Bit par bit
+
     }
   }
   
