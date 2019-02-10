@@ -37,7 +37,7 @@ byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
 const byte Black = 0;
 const byte Wall = 1;
 const byte Blue = 2;
-const byte Red = 3;
+const byte Car = 3;
 const byte Green = 4;
 const byte Purple = 5;
 
@@ -58,7 +58,7 @@ struct pointOnMatrix {
 
 
 unsigned long lastMillis = 0;
-unsigned const int screenMoves = 1000;  // In miliseconds, every how much will the menace grow
+unsigned const int screenMoves = 500;  // In miliseconds, every how much will the menace grow
 
 unsigned int leftButtonValue = LOW;
 unsigned int rightButtonValue = LOW;
@@ -80,7 +80,7 @@ byte rightButtonPushed = 0;
 // ---------------------------------------------
 byte carPosition = 3;                       // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
-byte probaApparitionLigne = 50;             // Probability of a new line appearing when possible
+byte probaApparitionLigne = 80;             // Probability of a new line appearing when possible
 byte probaApparitionBlock = 50;             // For a new line, for each block, the probability of it being a "wall"
 
 
@@ -114,8 +114,8 @@ if 0, create line one by one - DONE
 
 lower all lines - DONE
 add new line - DONE
-if player on obstacle, game end
-if player not on obs, nothing
+if player on obstacle, game end - DONE
+if player not on obs, nothing - DONE
 
 increase line count
 */
@@ -145,13 +145,13 @@ if(millis() - lastMillis > screenMoves) {
     byte blockedSpacesCounter = 0;
     if(random(100) < probaApparitionLigne) {
       for(byte counter = 0; counter < 6; counter++) {
-          if(random(100) < probaApparitionBlock) {
+          if(random(100) < probaApparitionBlock && blockedSpacesCounter <= 4) {
             newLine[counter] = Wall;
             blockedSpacesCounter++;
         }
       }
     }
-    ticker = blockedSpacesCounter;
+    ticker = blockedSpacesCounter + 1;
   }
 
   
@@ -164,6 +164,7 @@ if(millis() - lastMillis > screenMoves) {
   lastMillis = millis();
   leftButtonPushed = 0;
   rightButtonPushed = 0;
+  updateLEDmatrix(newLine);
   outputDisplay();
 }
 
@@ -222,6 +223,14 @@ void updateLEDmatrix(byte newLine[6]) {
     }
   }
 
+  // We check if the car hit something
+  if(LEDMatrix[9][carPosition] != Black) {
+    gameOver();
+  }
+  else {
+    LEDMatrix[9][carPosition] = Car;
+  }
+
   // Create a new line in top of the existing matrix, with the passed argument.
   for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
     LEDMatrix[0][columnIterator] = newLine[columnIterator];
@@ -243,7 +252,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Purple;}
       }
       // If we're on an uneven column, we do a mathematical trick to invert it
@@ -252,7 +261,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Purple;}
       }
     }
@@ -276,4 +285,14 @@ void digitalOutputDisplay() {
       }
     }
   }
+}
+
+void gameOver() {
+  delay(2000);
+  for(byte rowIterator = 0; rowIterator < displayNumberOfRows - 1; rowIterator++) {
+    for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+      LEDMatrix[rowIterator][columnIterator] = Car;
+    }
+  }
+   
 }
