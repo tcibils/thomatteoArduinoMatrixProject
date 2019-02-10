@@ -18,8 +18,19 @@ CRGB leds[NUM_LEDS];                                          // Defining leds t
 #define DATA_PIN 6                                            // Output pin for FastLed
 
 // LED Matrix
-// top column is from 0 to 7, bottom one from 56 to 63 (for a 8x8 matrix)
-byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns];
+// Position 0, 0 is on top left
+byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0}
+};
 
 
 // Original colours for leds.
@@ -99,10 +110,10 @@ void setup() {
 move player G/D (DONE)
 
 if >0, don’t create line - DONE(N/A)
-if 0, create line one by one - En cours
+if 0, create line one by one - DONE
 
-lower all lines
-add new line
+lower all lines - DONE
+add new line - DONE
 if player on obstacle, game end
 if player not on obs, nothing
 
@@ -204,6 +215,17 @@ void clearLEDMatrix() {
 }
 
 void updateLEDmatrix(byte newLine[6]) {
+  // Getting each line down by one bit
+  for(byte rowIterator = 0; rowIterator < displayNumberOfRows - 1; rowIterator++) {
+    for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+      LEDMatrix[9-rowIterator][columnIterator] = LEDMatrix[9-rowIterator-1][columnIterator];
+    }
+  }
+
+  // Create a new line in top of the existing matrix, with the passed argument.
+  for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+    LEDMatrix[0][columnIterator] = newLine[columnIterator];
+  }
   
 }
 
