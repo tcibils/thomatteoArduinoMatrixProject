@@ -24,7 +24,7 @@ byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns];
 
 // Original colours for leds.
 const byte Black = 0;
-const byte White = 1;
+const byte Wall = 1;
 const byte Blue = 2;
 const byte Red = 3;
 const byte Green = 4;
@@ -70,7 +70,7 @@ byte rightButtonPushed = 0;
 byte carPosition = 3;                       // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte probaApparitionLigne = 50;             // Probability of a new line appearing when possible
-
+byte probaApparitionBlock = 50;             // For a new line, for each block, the probability of it being a "wall"
 
 
 void setup() {
@@ -129,13 +129,21 @@ if(millis() - lastMillis > screenMoves) {
   }
 
   
+  byte newLine[6] = {0,0,0,0,0,0};
   if(ticker == 0) {
+    byte blockedSpacesCounter = 0;
     if(random(100) < probaApparitionLigne) {
-      // Créer une ligne
-      // Bit par bit
-
+      for(byte counter = 0; counter < 6; counter++) {
+          if(random(100) < probaApparitionBlock) {
+            newLine[counter] = Wall;
+            blockedSpacesCounter++;
+        }
+      }
     }
+    ticker = blockedSpacesCounter;
   }
+
+  
   
 
   if(ticker > 0) {
@@ -195,6 +203,10 @@ void clearLEDMatrix() {
   }
 }
 
+void updateLEDmatrix(byte newLine[6]) {
+  
+}
+
 
 // We update the physical display of the LED matrix, based on the LEDMatrix
 void outputDisplay() {
@@ -206,7 +218,7 @@ void outputDisplay() {
       if(columnIndex%2 == 0) {
         
         if(LEDMatrix[rowIndex][columnIndex] == Black) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Black;}
-        if(LEDMatrix[rowIndex][columnIndex] == White) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
@@ -215,7 +227,7 @@ void outputDisplay() {
       // If we're on an uneven column, we do a mathematical trick to invert it
       else if(columnIndex%2 == 1) {
         if(LEDMatrix[rowIndex][columnIndex] == Black) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Black;}
-        if(LEDMatrix[rowIndex][columnIndex] == White) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
