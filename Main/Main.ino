@@ -58,7 +58,6 @@ struct pointOnMatrix {
 
 
 unsigned long lastMillis = 0;
-unsigned const int screenMoves = 500;  // In miliseconds, every how much will the menace grow
 
 unsigned int leftButtonValue = LOW;
 unsigned int rightButtonValue = LOW;
@@ -80,9 +79,9 @@ byte rightButtonPushed = 0;
 // ---------------------------------------------
 byte carPosition = 3;                       // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
-byte probaApparitionLigne = 80;             // Probability of a new line appearing when possible
-byte probaApparitionBlock = 50;             // For a new line, for each block, the probability of it being a "wall"
-
+byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
+byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
+unsigned const int screenMoves = 500;       // In miliseconds, every how much will the menace grow
 
 void setup() {
 
@@ -107,17 +106,10 @@ void setup() {
 
 
 /* 
-move player G/D (DONE)
-
-if >0, don’t create line - DONE(N/A)
-if 0, create line one by one - DONE
-
-lower all lines - DONE
-add new line - DONE
-if player on obstacle, game end - DONE
-if player not on obs, nothing - DONE
-
-increase line count
+Star
+Score counter
+Speed increase
+Wall colours
 */
 
 
@@ -141,11 +133,16 @@ if(millis() - lastMillis > screenMoves) {
 
   
   byte newLine[6] = {0,0,0,0,0,0};
+  // If the ticker is 0, meaning we can create a new line
   if(ticker == 0) {
     byte blockedSpacesCounter = 0;
+    // We have a proba to pop a new line or not
     if(random(100) < probaApparitionLigne) {
+      byte freePassage = random(6);
+      // And we try to generate blocks
       for(byte counter = 0; counter < 6; counter++) {
-          if(random(100) < probaApparitionBlock && blockedSpacesCounter <= 4) {
+        // Each having a random proba of appearing
+          if(random(100) < probaApparitionBlock && freePassage != counter) {
             newLine[counter] = Wall;
             blockedSpacesCounter++;
         }
