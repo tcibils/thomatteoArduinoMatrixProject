@@ -69,13 +69,11 @@ unsigned int lastRightButtonValue = LOW;
 unsigned int lastUpButtonValue = LOW;
 unsigned int lastDownButtonValue = LOW;
 
-
-
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
 
 // Will count the number of lines the player passed.
-unsigned int playerScore = 1000;
+unsigned int playerScore = 0;
 
 // ---------------------------------------------
 // ---------------- GAME VARIABLES -------------
@@ -84,7 +82,10 @@ byte carPosition = 3;                       // Car position on the bootom line o
 byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
 byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
-unsigned const int screenMoves = 500;       // In miliseconds, every how much will the menace grow
+unsigned const int startScreenMoves = 500;  // Speed of the car at start of the game
+unsigned int screenMoves = 500;             // In miliseconds, how fast will the car go. That will be updated during the game.
+unsigned const int screenMovesMini = 100;   // Maximum speed of the game
+byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
 
 void setup() {
 
@@ -119,6 +120,19 @@ Wall colours
 
 
 void loop() {
+
+if(screenMoves > screenMovesMini) {
+  if(speedIncreaseMode == 0) {
+    screenMoves = startScreenMoves - playerScore;
+  }
+
+  if(speedIncreaseMode == 1) {
+    screenMoves = startScreenMoves - (50*(playerScore/50));
+  }
+  Serial.print("Speed :");
+  Serial.print(screenMoves);
+  Serial.print("\n");
+}
 
 if(millis() - lastMillis > screenMoves) {
 
