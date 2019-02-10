@@ -37,6 +37,7 @@ byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
 const byte Black = 0;
 const byte Wall = 1;
 const byte Blue = 2;
+const byte Red = 3;
 const byte Car = 3;
 const byte Green = 4;
 const byte Purple = 5;
@@ -72,6 +73,81 @@ unsigned int lastDownButtonValue = LOW;
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
 
+
+byte numberTable[10][5][3] {
+{
+  {1,1,1},
+  {1,0,1},
+  {1,0,1},
+  {1,0,1},
+  {1,1,1}
+},
+{
+  {0,1,0},
+  {0,1,0},
+  {0,1,0},
+  {0,1,0},
+  {0,1,0}
+},
+{
+  {1,1,1},
+  {0,0,1},
+  {1,1,1},
+  {1,0,0},
+  {1,1,1}
+},
+{
+  {1,1,1},
+  {0,0,1},
+  {1,1,1},
+  {0,0,1},
+  {1,1,1}
+},
+{
+  {1,0,1},
+  {1,0,1},
+  {1,1,1},
+  {0,0,1},
+  {0,0,1}
+},
+{
+  {1,1,1},
+  {1,0,0},
+  {1,1,1},
+  {0,0,1},
+  {1,1,1}
+},
+{
+  {1,1,1},
+  {1,0,0},
+  {1,1,1},
+  {1,0,1},
+  {1,1,1}
+},
+{
+  {1,1,1},
+  {0,0,1},
+  {0,1,1},
+  {0,0,1},
+  {0,0,1}
+},
+{
+  {1,1,1},
+  {1,0,1},
+  {1,1,1},
+  {1,0,1},
+  {1,1,1}
+},
+{
+  {1,1,1},
+  {1,0,1},
+  {1,1,1},
+  {0,0,1},
+  {1,1,1}
+}
+};
+
+
 // Will count the number of lines the player passed.
 unsigned int playerScore = 0;
 
@@ -82,7 +158,7 @@ byte carPosition = 3;                       // Car position on the bootom line o
 byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
 byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
-unsigned const int startScreenMoves = 500;  // Speed of the car at start of the game
+unsigned const int startScreenMoves = 300;  // Speed of the car at start of the game
 unsigned int screenMoves = 500;             // In miliseconds, how fast will the car go. That will be updated during the game.
 unsigned const int screenMovesMini = 100;   // Maximum speed of the game
 byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
@@ -108,12 +184,10 @@ void setup() {
 
 
 
-
 /* 
 Star
-Score counter
-Speed increase
 Wall colours
+End-game / restart
 */
 
 
@@ -282,6 +356,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Green)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
         if(LEDMatrix[rowIndex][columnIndex] == Car)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1].setRGB(0,0,LEDMatrix[rowIndex][columnIndex]);}
@@ -293,6 +368,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
         if(LEDMatrix[rowIndex][columnIndex] == Car) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[columnIndex*displayNumberOfRows + rowIndex].setRGB(0,0,LEDMatrix[rowIndex][columnIndex]);}
@@ -320,12 +396,41 @@ void digitalOutputDisplay() {
   }
 }
 
-void gameOver() {
-  delay(2000);
-  for(byte rowIterator = 0; rowIterator < displayNumberOfRows - 1; rowIterator++) {
-    for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
-      LEDMatrix[rowIterator][columnIterator] = Car;
+void displayScore() {
+  byte thousands = playerScore/1000;
+  byte hundreds = (playerScore - (thousands*1000))/100;
+  byte tens = (playerScore - (thousands*1000) - (hundreds*100))/10;
+  byte units = (playerScore - thousands*1000 - hundreds*100 - tens*10);
+  
+  clearLEDMatrix();
+
+  for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
+    for(byte columnIterator = 0; columnIterator < 3; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = numberTable[thousands][rowIterator][columnIterator];  
     }
   }
-   
+  for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
+    for(byte columnIterator = 3; columnIterator < 6; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = Red * numberTable[hundreds][rowIterator][columnIterator-3];  
+    }
+  }
+  for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
+    for(byte columnIterator = 0; columnIterator < 3; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = Red * numberTable[tens][rowIterator-5][columnIterator];  
+    }
+  }
+  for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
+    for(byte columnIterator = 3; columnIterator < 6; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = numberTable[units][rowIterator-5][columnIterator-3];  
+    }
+  }
+
+  outputDisplay();
+}
+
+void gameOver() {
+  Serial.print("game over");
+  delay(2000);
+  displayScore();
+  delay(10000); 
 }
