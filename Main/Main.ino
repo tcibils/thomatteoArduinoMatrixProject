@@ -273,65 +273,33 @@ void loop() {
       
       pushLinesDown();
       checkCarCrash();
-      diplayScoreInGame();
-      addLineTopMatrix(newLine);
+      if(gameStatus == 0) {
+        displayScoreInGame();
+        addLineTopMatrix(newLine);
       
-      playerScore++;
-      
-      outputDisplay();
+        playerScore++;
+      }
     }
-    
-        // ----------------------------------------------------------
-        // Checking if a button has been pushed, reacting accordingly
-        // ----------------------------------------------------------
-        
-        leftButtonValue = analogRead(leftButton);
-        if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
-          leftButtonPushed = 1;
-          rightButtonPushed = 0;
-        }
-        lastLeftButtonValue = leftButtonValue; // And we update what we read just after
-    
-        rightButtonValue = analogRead(rightButton);
-        if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
-          leftButtonPushed = 0;
-          rightButtonPushed = 1;
-        }
-        lastRightButtonValue = rightButtonValue; // And we update what we read just after
-    
-        /*
-        upButtonValue = analogRead(upButton);
-        if (upButtonValue < 200 && lastUpButtonValue > 800) { 
-          
-        }
-        lastUpButtonValue = upButtonValue; // And we update what we read just after
-        */
-        
-        /*
-        downButtonValue = analogRead(downButton);
-        if (downButtonValue < 200 && lastDownButtonValue > 800) { 
-          
-        }
-        lastDownButtonValue = downButtonValue; // And we update what we read just after
-        */
-        
-        
-        aButtonValue = analogRead(aButton);
-        if (aButtonValue < 200 && lastAButtonValue > 800) { 
-          
-        }
-        lastAButtonValue = aButtonValue; // And we update what we read just after
-        
-
-        bButtonValue = analogRead(bButton);
-        if (bButtonValue < 200 && lastBButtonValue > 800) { 
-          
-        }
-        lastBButtonValue = bButtonValue; // And we update what we read just after
-        
-        
-      delay(1);
   }
+
+  // If it's game over
+  if(gameStatus == 1) {
+    // We update the LED matrix with the player score
+    displayScore();
+
+    // If the player has pushed A or B
+    if(aButtonPushed == 1 || bButtonPushed == 1) {
+      aButtonPushed = 0;
+      bButtonPushed = 0;
+      // We re-initialize the game.
+      reinitializeGame();
+      gameStatus = 0;
+    }
+  }
+    
+  outputDisplay();
+  checkButtons();      
+  delay(1);
 }
 
 // Makes the whole "LEDMatrix" equals to 0, i.e. each LED is off
@@ -342,6 +310,64 @@ void clearLEDMatrix() {
       LEDMatrix[i][j] = Black;
     }
   }
+}
+
+void checkButtons() {
+  // ----------------------------------------------------------
+  // Checking if a button has been pushed, reacting accordingly
+  // ----------------------------------------------------------
+
+  // Left and right are only used while playing
+  leftButtonValue = analogRead(leftButton);
+  if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
+    if(gameStatus == 0) {
+      leftButtonPushed = 1;
+      rightButtonPushed = 0;
+    }
+  }
+  lastLeftButtonValue = leftButtonValue; // And we update what we read just after
+
+  rightButtonValue = analogRead(rightButton);
+  if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
+    if(gameStatus == 0) {
+      leftButtonPushed = 0;
+      rightButtonPushed = 1;
+    }
+  }
+  lastRightButtonValue = rightButtonValue; // And we update what we read just after
+
+  /*
+  upButtonValue = analogRead(upButton);
+  if (upButtonValue < 200 && lastUpButtonValue > 800) { 
+    
+  }
+  lastUpButtonValue = upButtonValue; // And we update what we read just after
+  */
+  
+  /*
+  downButtonValue = analogRead(downButton);
+  if (downButtonValue < 200 && lastDownButtonValue > 800) { 
+    
+  }
+  lastDownButtonValue = downButtonValue; // And we update what we read just after
+  */
+  
+  // A and B buttons are only used if we're in game over, to restart the game.
+  aButtonValue = analogRead(aButton);
+  if (aButtonValue < 200 && lastAButtonValue > 800) { 
+    if(gameStatus == 1) {
+      aButtonPushed = 1;
+    }
+  }
+  lastAButtonValue = aButtonValue; // And we update what we read just after
+
+  bButtonValue = analogRead(bButton);
+  if (bButtonValue < 200 && lastBButtonValue > 800) { 
+    if(gameStatus == 1) {
+      bButtonPushed = 1;
+    }
+  }
+  lastBButtonValue = bButtonValue; // And we update what we read just after
 }
 
 
@@ -357,14 +383,14 @@ void pushLinesDown() {
 void checkCarCrash() {
   // We check if the car hit something
   if(LEDMatrix[9][carPosition] != Black) {
-    gameOver();
+    gameStatus = 1;   // Meaning game over
   }
   else {
     LEDMatrix[9][carPosition] = Car;
   }
 }
 
-void diplayScoreInGame() {
+void displayScoreInGame() {
   // On top of the top, we create a line for the score
   byte LEDSon = playerScore/100;
   byte lastLed = playerScore%100;
@@ -488,12 +514,4 @@ void reinitializeGame() {
   // We clear the LED Matrix
   clearLEDMatrix(); // Digitaly
   outputDisplay();  // And physically
-}
-
-void gameOver() {
-  delay(2000);
-  displayScore();
-  gameStatus = 1;
-  delay(10000); 
-  reinitializeGame();
 }
