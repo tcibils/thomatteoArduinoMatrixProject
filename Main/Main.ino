@@ -206,103 +206,111 @@ End-game / restart (=> code cleaning)
 
 void loop() {
 
-// Accelereates the game depending on the acceleration and the mode - limit is screenMovesMini
-if(screenMoves > screenMovesMini) {
-  if(speedIncreaseMode == 0) {
-    screenMoves = startScreenMoves - accelaration*playerScore;
-  }
-
-  if(speedIncreaseMode == 1) {
-    screenMoves = startScreenMoves - accelaration*(50*(playerScore/50));
-  }
-}
-
-// Every x miliseconds, we make an iteration.
-if(millis() - lastMillis > screenMoves) {
-
-  // If the button "left" has been pushed, then the car goes left one column
-  if(leftButtonPushed == 1) {
-    if(carPosition > 0) {
-      carPosition--;
-    }
-  }
-
-  // If the button "right" has been pushed, then the car goes right one column
-  if(rightButtonPushed == 1) {
-    if(carPosition <5) {
-      carPosition++;
-    }
-  }
-
-  // We create the new line we'll put on top of our game
-  byte newLine[6] = {0,0,0,0,0,0};
-  
-  // If the ticker is 0, meaning we can create a new line with blocks
-  if(ticker == 0) {
-    // We'll check how many blocks we create
-    byte blockedSpacesCounter = 0;
-    // We have a proba to pop a new line or not
-    if(random(100) < probaApparitionLigne) {
-      byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
-      // And we try to generate blocks
-      for(byte counter = 0; counter < 6; counter++) {
-        // Each having a random proba of appearing
-          if(random(100) < probaApparitionBlock && freePassage != counter) {
-            newLine[counter] = Wall;
-            blockedSpacesCounter++;
-        }
+  if(gameStatus == 0) {
+    // Accelereates the game depending on the acceleration and the mode - limit is screenMovesMini
+    if(screenMoves > screenMovesMini) {
+      if(speedIncreaseMode == 0) {
+        screenMoves = startScreenMoves - accelaration*playerScore;
+      }
+    
+      if(speedIncreaseMode == 1) {
+        screenMoves = startScreenMoves - accelaration*(50*(playerScore/50));
       }
     }
-    ticker = blockedSpacesCounter + 1;
-  }
-
-  if(ticker > 0) {
-    ticker--;
-  }
-  
-  lastMillis = millis();
-  leftButtonPushed = 0;
-  rightButtonPushed = 0;
-  updateLEDmatrix(newLine);
-  playerScore++;
-  outputDisplay();
-}
-
-    // ----------------------------------------------------------
-    // Checking if a button has been pushed, reacting accordingly
-    // ----------------------------------------------------------
     
-    leftButtonValue = analogRead(leftButton);
-    if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
-      leftButtonPushed = 1;
-      rightButtonPushed = 0;
-    }
-    lastLeftButtonValue = leftButtonValue; // And we update what we read just after
-
-    rightButtonValue = analogRead(rightButton);
-    if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
+    // Every x miliseconds, we make an iteration.
+    if(millis() - lastMillis > screenMoves) {
+    
+      // If the button "left" has been pushed, then the car goes left one column
+      if(leftButtonPushed == 1) {
+        if(carPosition > 0) {
+          carPosition--;
+        }
+      }
+    
+      // If the button "right" has been pushed, then the car goes right one column
+      if(rightButtonPushed == 1) {
+        if(carPosition <5) {
+          carPosition++;
+        }
+      }
+    
+      // We create the new line we'll put on top of our game
+      byte newLine[6] = {0,0,0,0,0,0};
+      
+      // If the ticker is 0, meaning we can create a new line with blocks
+      if(ticker == 0) {
+        // We'll check how many blocks we create
+        byte blockedSpacesCounter = 0;
+        // We have a proba to pop a new line or not
+        if(random(100) < probaApparitionLigne) {
+          byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
+          // And we try to generate blocks
+          for(byte counter = 0; counter < 6; counter++) {
+            // Each having a random proba of appearing
+              if(random(100) < probaApparitionBlock && freePassage != counter) {
+                newLine[counter] = Wall;
+                blockedSpacesCounter++;
+            }
+          }
+        }
+        ticker = blockedSpacesCounter + 1;
+      }
+    
+      if(ticker > 0) {
+        ticker--;
+      }
+      
+      lastMillis = millis();
       leftButtonPushed = 0;
-      rightButtonPushed = 1;
-    }
-    lastRightButtonValue = rightButtonValue; // And we update what we read just after
-
-    /*
-    upButtonValue = analogRead(upButton);
-    if (upButtonValue < 200 && lastUpButtonValue > 800) { 
+      rightButtonPushed = 0;
       
-    }
-    lastUpButtonValue = upButtonValue; // And we update what we read just after
-    */
-    
-    /*
-    downButtonValue = analogRead(downButton);
-    if (downButtonValue < 200 && lastDownButtonValue > 800) { 
+      pushLinesDown();
+      checkCarCrash();
+      diplayScoreInGame();
+      addLineTopMatrix(newLine);
       
+      playerScore++;
+      
+      outputDisplay();
     }
-    lastDownButtonValue = downButtonValue; // And we update what we read just after
-    */
     
-  delay(1);
+        // ----------------------------------------------------------
+        // Checking if a button has been pushed, reacting accordingly
+        // ----------------------------------------------------------
+        
+        leftButtonValue = analogRead(leftButton);
+        if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
+          leftButtonPushed = 1;
+          rightButtonPushed = 0;
+        }
+        lastLeftButtonValue = leftButtonValue; // And we update what we read just after
+    
+        rightButtonValue = analogRead(rightButton);
+        if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
+          leftButtonPushed = 0;
+          rightButtonPushed = 1;
+        }
+        lastRightButtonValue = rightButtonValue; // And we update what we read just after
+    
+        /*
+        upButtonValue = analogRead(upButton);
+        if (upButtonValue < 200 && lastUpButtonValue > 800) { 
+          
+        }
+        lastUpButtonValue = upButtonValue; // And we update what we read just after
+        */
+        
+        /*
+        downButtonValue = analogRead(downButton);
+        if (downButtonValue < 200 && lastDownButtonValue > 800) { 
+          
+        }
+        lastDownButtonValue = downButtonValue; // And we update what we read just after
+        */
+        
+      delay(1);
+  }
 }
 
 // Makes the whole "LEDMatrix" equals to 0, i.e. each LED is off
@@ -315,25 +323,17 @@ void clearLEDMatrix() {
   }
 }
 
-void reinitializeGame() {
-  // We repass modified game variables to their initial positions
-  carPosition = initialCarPosition;
-  ticker = initialTicker;          
-  screenMoves = startScreenMoves;  
-  playerScore = initialPlayerScore;
 
-  // And we set the game status to "play"
-  gameStatus = 0;
-}
-
-void updateLEDmatrix(byte newLine[6]) {
+void pushLinesDown() {
   // Getting each line down by one bit
   for(byte rowIterator = 0; rowIterator < displayNumberOfRows - 2; rowIterator++) {
     for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
       LEDMatrix[9-rowIterator][columnIterator] = LEDMatrix[9-rowIterator-1][columnIterator];
     }
   }
+}
 
+void checkCarCrash() {
   // We check if the car hit something
   if(LEDMatrix[9][carPosition] != Black) {
     gameOver();
@@ -341,12 +341,9 @@ void updateLEDmatrix(byte newLine[6]) {
   else {
     LEDMatrix[9][carPosition] = Car;
   }
+}
 
-  // Create a new line in top of the existing matrix, with the passed argument.
-  for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
-    LEDMatrix[1][columnIterator] = newLine[columnIterator];
-  }
-
+void diplayScoreInGame() {
   // On top of the top, we create a line for the score
   byte LEDSon = playerScore/100;
   byte lastLed = playerScore%100;
@@ -359,11 +356,17 @@ void updateLEDmatrix(byte newLine[6]) {
     // And we get the last dot to get more and more blue, as the score goes up
     if(columnIterator == LEDSon) {
       LEDMatrix[0][columnIterator] = lastLed;
-    }
-      
+    }   
   }
 }
 
+
+void addLineTopMatrix(byte newLine[6]) {
+  // Create a new line in top of the existing matrix, with the passed argument.
+  for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+    LEDMatrix[1][columnIterator] = newLine[columnIterator];
+  }
+}
 
 // We update the physical display of the LED matrix, based on the LEDMatrix
 void outputDisplay() {
@@ -451,8 +454,25 @@ void displayScore() {
   outputDisplay();
 }
 
+void reinitializeGame() {
+  // We repass modified game variables to their initial positions
+  carPosition = initialCarPosition;
+  ticker = initialTicker;          
+  screenMoves = startScreenMoves;  
+  playerScore = initialPlayerScore;
+
+  // We set the game status to "play"
+  gameStatus = 0;
+
+  // We clear the LED Matrix
+  clearLEDMatrix(); // Digitaly
+  outputDisplay();  // And physically
+}
+
 void gameOver() {
   delay(2000);
   displayScore();
+  gameStatus = 1;
   delay(10000); 
+  reinitializeGame();
 }
