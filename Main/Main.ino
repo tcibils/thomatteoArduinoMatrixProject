@@ -159,9 +159,10 @@ byte ticker = 5;                            // Once the ticker is 0, we generate
 byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
 byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
 unsigned const int startScreenMoves = 300;  // Speed of the car at start of the game
-unsigned int screenMoves = 500;             // In miliseconds, how fast will the car go. That will be updated during the game.
+unsigned int screenMoves = startScreenMoves;// In miliseconds, how fast will the car go. That will be updated during the game.
 unsigned const int screenMovesMini = 100;   // Maximum speed of the game
 byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
+byte accelaration = 1;                      // The rate at which the game will accelerate
 
 void setup() {
 
@@ -198,11 +199,11 @@ void loop() {
 
 if(screenMoves > screenMovesMini) {
   if(speedIncreaseMode == 0) {
-    screenMoves = startScreenMoves - playerScore;
+    screenMoves = startScreenMoves - accelaration*playerScore;
   }
 
   if(speedIncreaseMode == 1) {
-    screenMoves = startScreenMoves - (50*(playerScore/50));
+    screenMoves = startScreenMoves - accelaration*(50*(playerScore/50));
   }
   Serial.print("Speed :");
   Serial.print(screenMoves);
