@@ -187,7 +187,8 @@ void setup() {
 /* 
 Star
 Wall colours
-End-game / restart
+End-game / restart (=> code cleaning)
+Speed up quicker ?
 */
 
 
@@ -326,12 +327,13 @@ void updateLEDmatrix(byte newLine[6]) {
   }
 
   // On top of the top, we create a line for the score
-  byte LEDSon = playerScore/255;
-  byte lastLed = playerScore%255;
+  byte LEDSon = playerScore/100;
+  byte lastLed = playerScore%100;
+  
   for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
-    // We plot 1 blue dot for each 255 points the player has
+    // We plot 1 blue dot for each 100 points the player has
     if(columnIterator < LEDSon) {
-      LEDMatrix[0][columnIterator] = Blue;
+      LEDMatrix[0][columnIterator] = Red;
     }
     // And we get the last dot to get more and more blue, as the score goes up
     if(columnIterator == LEDSon) {
@@ -359,7 +361,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
-        if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1].setRGB(0,0,LEDMatrix[rowIndex][columnIndex]);}
+        if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
       }
       // If we're on an uneven column, we do a mathematical trick to invert it
       else if(columnIndex%2 == 1) {
@@ -371,7 +373,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
-        if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[columnIndex*displayNumberOfRows + rowIndex].setRGB(0,0,LEDMatrix[rowIndex][columnIndex]);}
+        if(LEDMatrix[rowIndex][columnIndex] > 5)     {leds[columnIndex*displayNumberOfRows + rowIndex].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
       }
     }
   }
