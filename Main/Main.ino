@@ -73,7 +73,6 @@ unsigned int lastDownButtonValue = LOW;
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
 
-
 byte numberTable[10][5][3] {
 {
   {1,1,1},
@@ -148,8 +147,9 @@ byte numberTable[10][5][3] {
 };
 
 
-// Will count the number of lines the player passed.
-unsigned int playerScore = 0;
+
+unsigned int playerScore = 0;               // Will count the number of lines the player passed.
+byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
 
 // ---------------------------------------------
 // ---------------- GAME VARIABLES -------------
@@ -196,6 +196,7 @@ End-game / restart (=> code cleaning)
 
 void loop() {
 
+// Accelereates the game depending on the acceleration and the mode - limit is screenMovesMini
 if(screenMoves > screenMovesMini) {
   if(speedIncreaseMode == 0) {
     screenMoves = startScreenMoves - accelaration*playerScore;
@@ -206,28 +207,33 @@ if(screenMoves > screenMovesMini) {
   }
 }
 
+// Every x miliseconds, we make an iteration.
 if(millis() - lastMillis > screenMoves) {
 
+  // If the button "left" has been pushed, then the car goes left one column
   if(leftButtonPushed == 1) {
     if(carPosition > 0) {
       carPosition--;
     }
   }
 
+  // If the button "right" has been pushed, then the car goes right one column
   if(rightButtonPushed == 1) {
     if(carPosition <5) {
       carPosition++;
     }
   }
 
-  
+  // We create the new line we'll put on top of our game
   byte newLine[6] = {0,0,0,0,0,0};
-  // If the ticker is 0, meaning we can create a new line
+  
+  // If the ticker is 0, meaning we can create a new line with blocks
   if(ticker == 0) {
+    // We'll check how many blocks we create
     byte blockedSpacesCounter = 0;
     // We have a proba to pop a new line or not
     if(random(100) < probaApparitionLigne) {
-      byte freePassage = random(6);
+      byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
       // And we try to generate blocks
       for(byte counter = 0; counter < 6; counter++) {
         // Each having a random proba of appearing
@@ -239,9 +245,6 @@ if(millis() - lastMillis > screenMoves) {
     }
     ticker = blockedSpacesCounter + 1;
   }
-
-  
-  
 
   if(ticker > 0) {
     ticker--;
@@ -301,6 +304,8 @@ void clearLEDMatrix() {
     }
   }
 }
+
+
 
 void updateLEDmatrix(byte newLine[6]) {
   // Getting each line down by one bit
@@ -428,7 +433,6 @@ void displayScore() {
 }
 
 void gameOver() {
-  Serial.print("game over");
   delay(2000);
   displayScore();
   delay(10000); 
