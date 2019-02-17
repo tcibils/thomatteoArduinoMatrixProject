@@ -203,8 +203,6 @@ void setup() {
 
 /* 
 Star
-Wall colours
-End-game / restart (=> code cleaning)
 */
 
 
