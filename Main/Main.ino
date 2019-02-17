@@ -148,21 +148,31 @@ byte numberTable[10][5][3] {
 
 
 
-unsigned int playerScore = 0;               // Will count the number of lines the player passed.
 byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
 
 // ---------------------------------------------
-// ---------------- GAME VARIABLES -------------
+// -------- NON-MODIFIED GAME VARIABLES --------
 // ---------------------------------------------
-byte carPosition = 3;                       // Car position on the bootom line of the LED matrix (so the column)
-byte ticker = 5;                            // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
-byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
-byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
-unsigned const int startScreenMoves = 300;  // Speed of the car at start of the game
-unsigned int screenMoves = startScreenMoves;// In miliseconds, how fast will the car go. That will be updated during the game.
-unsigned const int screenMovesMini = 100;   // Maximum speed of the game
-byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
-byte accelaration = 1;                      // The rate at which the game will accelerate
+const byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
+const byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
+unsigned const int startScreenMoves = 300;        // Speed of the car at start of the game
+unsigned const int screenMovesMini = 100;         // Maximum speed of the game
+const byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
+const byte accelaration = 1;                      // The rate at which the game will accelerate
+
+const byte initialCarPosition = 3;                // Car position on the bootom line of the LED matrix (so the column)
+const byte initialTicker = 5;                     // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
+unsigned const int initialPlayerScore = 0;        // Will count the number of lines the player passed.
+
+// ---------------------------------------------
+// ----------- MODIFIED GAME VARIABLES ---------
+// ---------------------------------------------
+byte carPosition = initialCarPosition;            // Car position on the bootom line of the LED matrix (so the column)
+byte ticker = initialTicker;                      // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
+unsigned int screenMoves = startScreenMoves;      // In miliseconds, how fast will the car go. That will be updated during the game.
+unsigned int playerScore = initialPlayerScore;    // Will count the number of lines the player passed. SHOULD NOT BE MODIFED
+
+
 
 void setup() {
 
@@ -305,7 +315,16 @@ void clearLEDMatrix() {
   }
 }
 
+void reinitializeGame() {
+  // We repass modified game variables to their initial positions
+  carPosition = initialCarPosition;
+  ticker = initialTicker;          
+  screenMoves = startScreenMoves;  
+  playerScore = initialPlayerScore;
 
+  // And we set the game status to "play"
+  gameStatus = 0;
+}
 
 void updateLEDmatrix(byte newLine[6]) {
   // Getting each line down by one bit
