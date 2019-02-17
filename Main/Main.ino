@@ -189,7 +189,6 @@ void setup() {
 Star
 Wall colours
 End-game / restart (=> code cleaning)
-Speed up quicker ?
 */
 
 
@@ -205,9 +204,6 @@ if(screenMoves > screenMovesMini) {
   if(speedIncreaseMode == 1) {
     screenMoves = startScreenMoves - accelaration*(50*(playerScore/50));
   }
-  Serial.print("Speed :");
-  Serial.print(screenMoves);
-  Serial.print("\n");
 }
 
 if(millis() - lastMillis > screenMoves) {
