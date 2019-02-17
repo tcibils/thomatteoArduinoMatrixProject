@@ -64,14 +64,20 @@ unsigned int leftButtonValue = LOW;
 unsigned int rightButtonValue = LOW;
 unsigned int upButtonValue = LOW;
 unsigned int downButtonValue = LOW;
+unsigned int aButtonValue = LOW;
+unsigned int bButtonValue = LOW;
 
 unsigned int lastLeftButtonValue = LOW;
 unsigned int lastRightButtonValue = LOW;
 unsigned int lastUpButtonValue = LOW;
 unsigned int lastDownButtonValue = LOW;
+unsigned int lastAButtonValue = LOW;
+unsigned int lastBButtonValue = LOW;
 
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
+byte aButtonPushed = 0;
+byte bButtonPushed = 0;
 
 byte numberTable[10][5][3] {
 {
@@ -308,6 +314,21 @@ void loop() {
         }
         lastDownButtonValue = downButtonValue; // And we update what we read just after
         */
+        
+        
+        aButtonValue = analogRead(aButton);
+        if (aButtonValue < 200 && lastAButtonValue > 800) { 
+          
+        }
+        lastAButtonValue = aButtonValue; // And we update what we read just after
+        
+
+        bButtonValue = analogRead(bButton);
+        if (bButtonValue < 200 && lastBButtonValue > 800) { 
+          
+        }
+        lastBButtonValue = bButtonValue; // And we update what we read just after
+        
         
       delay(1);
   }
