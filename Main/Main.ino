@@ -159,8 +159,8 @@ byte gameStatus = 0;                        // 0 means we're playing, 1 means it
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
 // ---------------------------------------------
-const byte probaApparitionLigne = 90;             // Probability of a new line appearing when possible
-const byte probaApparitionBlock = 80;             // For a new line, for each block, the probability of it being a "wall"
+const byte probaApparitionLigne = 70;             // Probability of a new line appearing when possible
+const byte probaApparitionBlock = 40;             // For a new line, for each block, the probability of it being a "wall"
 unsigned const int startScreenMoves = 300;        // Speed of the car at start of the game
 unsigned const int screenMovesMini = 100;         // Maximum speed of the game
 const byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
@@ -203,6 +203,8 @@ void setup() {
 
 /* 
 Star
+Variability of parameters with player score : proba apparition lines, proba apprition block
+Letting the player change the acceleration with up/down buttons
 Music ?
 */
 
