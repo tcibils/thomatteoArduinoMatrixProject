@@ -171,8 +171,8 @@ byte numberTable[10][5][3] {
 };
 
 
-
-byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
+byte gamePadMode = 1;                             // 0 means using my home-made gamepad, 1 means using an SNES gamepad
+const byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
@@ -341,81 +341,127 @@ void checkButtons() {
   // Checking if a button has been pushed, reacting accordingly
   // ----------------------------------------------------------
 
-  static uint16_t oldBtns = 0;      // Anciennes valeurs des boutons
-  uint16_t btns = getSnesButtons(); // Valeurs actuelles des boutons
-
-  if(btns & NO_GAMEPAD) {
-    Serial.println(F("No gamepad connected"));
-    return;
-  }
+  if(gamePadMode == 1) {
+    static uint16_t oldBtns = 0;      // Anciennes valeurs des boutons
+    uint16_t btns = getSnesButtons(); // Valeurs actuelles des boutons
+  
+    if(btns & NO_GAMEPAD) {
+      Serial.println(F("No gamepad connected"));
+      return;
+    }
+     
+    /* Affiche l'état de chaque bouton */
+    if(btns & BTN_A) {
+      if(gameStatus == 1) {
+        aButtonPushed = 1;
+      }
+    }
+        
+    if(btns & BTN_B){
+      if(gameStatus == 1) {
+        bButtonPushed = 1;
+      }
+    }
+  
+    /*
+    if(btns & BTN_X)
+      Serial.print(F("X "));
+    else
+      Serial.print(F("- "));
    
-  /* Affiche l'état de chaque bouton */
-  if(btns & BTN_A) {
-    if(gameStatus == 1) {
-      aButtonPushed = 1;
+    if(btns & BTN_Y)
+      Serial.print(F("Y "));
+    else
+      Serial.print(F("- "));
+   
+    if(btns & BTN_SELECT)
+      Serial.print(F("SELECT "));
+    else
+      Serial.print(F("------ "));
+   
+    if(btns & BTN_START)
+      Serial.print(F("START "));
+    else
+      Serial.print(F("----- "));
+   
+    if(btns & BTN_UP)
+      Serial.print(F("UP "));
+    else
+      Serial.print(F("-- "));
+   
+    if(btns & BTN_DOWN)
+      Serial.print(F("DOWN "));
+    else
+      Serial.print(F("---- "));
+   */
+    if(btns & BTN_LEFT) {
+        leftButtonPushed = 1;
+        rightButtonPushed = 0;
     }
-  }
-      
-  if(btns & BTN_B){
-    if(gameStatus == 1) {
-      bButtonPushed = 1;
+   
+    if(btns & BTN_RIGHT){
+        leftButtonPushed = 0;
+        rightButtonPushed = 1;
     }
+    /* 
+    if(btns & BTN_L)
+      Serial.print(F("L "));
+    else
+      Serial.print(F("- "));
+   
+    if(btns & BTN_R)
+      Serial.println(F("R"));
+    else
+      Serial.println(F("-"));
+  */
   }
 
-  /*
-  if(btns & BTN_X)
-    Serial.print(F("X "));
-  else
-    Serial.print(F("- "));
- 
-  if(btns & BTN_Y)
-    Serial.print(F("Y "));
-  else
-    Serial.print(F("- "));
- 
-  if(btns & BTN_SELECT)
-    Serial.print(F("SELECT "));
-  else
-    Serial.print(F("------ "));
- 
-  if(btns & BTN_START)
-    Serial.print(F("START "));
-  else
-    Serial.print(F("----- "));
- 
-  if(btns & BTN_UP)
-    Serial.print(F("UP "));
-  else
-    Serial.print(F("-- "));
- 
-  if(btns & BTN_DOWN)
-    Serial.print(F("DOWN "));
-  else
-    Serial.print(F("---- "));
- */
-  if(btns & BTN_LEFT) {
-      leftButtonPushed = 1;
-      rightButtonPushed = 0;
+  if(gamePadMode == 0) {
+    
+    // ----------------------------------------------------------
+    // Checking if a button has been pushed, reacting accordingly
+    // ----------------------------------------------------------
+  
+    // Left and right are only used while playing
+    leftButtonValue = analogRead(leftButton);
+    if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
+      if(gameStatus == 0) {
+        leftButtonPushed = 1;
+        rightButtonPushed = 0;
+      }
+    }
+    lastLeftButtonValue = leftButtonValue; // And we update what we read just after
+  
+    rightButtonValue = analogRead(rightButton);
+    if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
+      if(gameStatus == 0) {
+        leftButtonPushed = 0;
+        rightButtonPushed = 1;
+      }
+    }
+    lastRightButtonValue = rightButtonValue; // And we update what we read just after
+  
+    // A and B buttons are only used if we're in game over, to restart the game.
+    aButtonValue = analogRead(aButton);
+    if (aButtonValue < 200 && lastAButtonValue > 800) { 
+      if(gameStatus == 1) {
+        aButtonPushed = 1;
+      }
+    }
+    lastAButtonValue = aButtonValue; // And we update what we read just after
+  
+    bButtonValue = analogRead(bButton);
+    if (bButtonValue < 200 && lastBButtonValue > 800) { 
+      if(gameStatus == 1) {
+        bButtonPushed = 1;
+      }
+    }
+    lastBButtonValue = bButtonValue; // And we update what we read just after
   }
- 
-  if(btns & BTN_RIGHT){
-      leftButtonPushed = 0;
-      rightButtonPushed = 1;
-  }
-  /* 
-  if(btns & BTN_L)
-    Serial.print(F("L "));
-  else
-    Serial.print(F("- "));
- 
-  if(btns & BTN_R)
-    Serial.println(F("R"));
-  else
-    Serial.println(F("-"));
-*/
 }
 
 /** Retourne l'état de chaque bouton sous la forme d'un entier sur 16 bits. */
+/* Only makes sense if gamePadMode == 1 */
 uint16_t getSnesButtons() {
  
   /* 1 bouton = 1 bit */
