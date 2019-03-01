@@ -17,6 +17,21 @@
 CRGB leds[NUM_LEDS];                                          // Defining leds table for FastLed
 #define DATA_PIN 6                                            // Output pin for FastLed
 
+/* Constantes des bits de chaque bouton */
+#define BTN_A 256
+#define BTN_B 1
+#define BTN_X 512
+#define BTN_Y 2
+#define BTN_SELECT 4
+#define BTN_START 8
+#define BTN_UP 16
+#define BTN_DOWN 32
+#define BTN_LEFT 64
+#define BTN_RIGHT 128
+#define BTN_L 1024
+#define BTN_R 2048
+#define NO_GAMEPAD 61440
+
 // LED Matrix
 // Position 0, 0 is on top left
 byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
@@ -51,6 +66,9 @@ const byte Purple = 5;
 #define aButton A0           // Input pin for button A
 #define bButton A1           // Input pin for button B
 
+static const byte PIN_LATCH = 2;
+static const byte PIN_CLOCK = 3;
+static const byte PIN_DATA = 4;
 
 struct pointOnMatrix {
   byte lineCoordinate;
@@ -194,6 +212,11 @@ void setup() {
   pinMode(rightButton, INPUT);
   pinMode(aButton, INPUT);
   pinMode(bButton, INPUT);
+  
+  /* Initialisation des broches */
+  pinMode(PIN_LATCH, OUTPUT);
+  pinMode(PIN_CLOCK, OUTPUT);
+  pinMode(PIN_DATA, INPUT); 
 
   // Initializing randomness
   randomSeed(analogRead(0));
@@ -318,57 +341,103 @@ void checkButtons() {
   // Checking if a button has been pushed, reacting accordingly
   // ----------------------------------------------------------
 
-  // Left and right are only used while playing
-  leftButtonValue = analogRead(leftButton);
-  if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
-    if(gameStatus == 0) {
-      leftButtonPushed = 1;
-      rightButtonPushed = 0;
-    }
-  }
-  lastLeftButtonValue = leftButtonValue; // And we update what we read just after
+  static uint16_t oldBtns = 0;      // Anciennes valeurs des boutons
+  uint16_t btns = getSnesButtons(); // Valeurs actuelles des boutons
 
-  rightButtonValue = analogRead(rightButton);
-  if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
-    if(gameStatus == 0) {
-      leftButtonPushed = 0;
-      rightButtonPushed = 1;
-    }
+  if(btns & NO_GAMEPAD) {
+    Serial.println(F("No gamepad connected"));
+    return;
   }
-  lastRightButtonValue = rightButtonValue; // And we update what we read just after
-
-  /*
-  upButtonValue = analogRead(upButton);
-  if (upButtonValue < 200 && lastUpButtonValue > 800) { 
-    
-  }
-  lastUpButtonValue = upButtonValue; // And we update what we read just after
-  */
-  
-  /*
-  downButtonValue = analogRead(downButton);
-  if (downButtonValue < 200 && lastDownButtonValue > 800) { 
-    
-  }
-  lastDownButtonValue = downButtonValue; // And we update what we read just after
-  */
-  
-  // A and B buttons are only used if we're in game over, to restart the game.
-  aButtonValue = analogRead(aButton);
-  if (aButtonValue < 200 && lastAButtonValue > 800) { 
+   
+  /* Affiche l'état de chaque bouton */
+  if(btns & BTN_A) {
     if(gameStatus == 1) {
       aButtonPushed = 1;
     }
   }
-  lastAButtonValue = aButtonValue; // And we update what we read just after
-
-  bButtonValue = analogRead(bButton);
-  if (bButtonValue < 200 && lastBButtonValue > 800) { 
+      
+  if(btns & BTN_B){
     if(gameStatus == 1) {
       bButtonPushed = 1;
     }
   }
-  lastBButtonValue = bButtonValue; // And we update what we read just after
+
+  /*
+  if(btns & BTN_X)
+    Serial.print(F("X "));
+  else
+    Serial.print(F("- "));
+ 
+  if(btns & BTN_Y)
+    Serial.print(F("Y "));
+  else
+    Serial.print(F("- "));
+ 
+  if(btns & BTN_SELECT)
+    Serial.print(F("SELECT "));
+  else
+    Serial.print(F("------ "));
+ 
+  if(btns & BTN_START)
+    Serial.print(F("START "));
+  else
+    Serial.print(F("----- "));
+ 
+  if(btns & BTN_UP)
+    Serial.print(F("UP "));
+  else
+    Serial.print(F("-- "));
+ 
+  if(btns & BTN_DOWN)
+    Serial.print(F("DOWN "));
+  else
+    Serial.print(F("---- "));
+ */
+  if(btns & BTN_LEFT) {
+      leftButtonPushed = 1;
+      rightButtonPushed = 0;
+  }
+ 
+  if(btns & BTN_RIGHT){
+      leftButtonPushed = 0;
+      rightButtonPushed = 1;
+  }
+  /* 
+  if(btns & BTN_L)
+    Serial.print(F("L "));
+  else
+    Serial.print(F("- "));
+ 
+  if(btns & BTN_R)
+    Serial.println(F("R"));
+  else
+    Serial.println(F("-"));
+*/
+}
+
+/** Retourne l'état de chaque bouton sous la forme d'un entier sur 16 bits. */
+uint16_t getSnesButtons() {
+ 
+  /* 1 bouton = 1 bit */
+  uint16_t value = 0;
+ 
+  /* Capture de l'état courant des boutons */
+  digitalWrite(PIN_LATCH, HIGH);
+  digitalWrite(PIN_LATCH, LOW);
+ 
+  /* Récupère l'état de chaque bouton (12 bits + 4 bits à "1") */
+  for(byte i = 0; i < 16; ++i) {
+ 
+    /* Lit l'état du bouton et décale le bit reçu pour former l'entier sur 16 bits final */
+    value |= digitalRead(PIN_DATA) << i;
+ 
+    /* Pulsation du signal d'horloge */
+    digitalWrite(PIN_CLOCK, HIGH);
+    digitalWrite(PIN_CLOCK, LOW);
+  }
+ 
+  /* Retourne le résultat sous une forme facile à manipuler (bouton appuyé = bit à "1") */
+  return ~value;
 }
 
 
