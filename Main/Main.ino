@@ -234,7 +234,7 @@ void setup() {
 
 /* 
 Star
-Variability of parameters with player score : proba apparition lines, proba apprition block
+Variability of parameters with player score : proba apparition lines, proba apprition block : we think formulas are OK, but it's not working. Check rounding ?
 Letting the player change the acceleration with up/down buttons
 Make the matrix size abstract
 Music ?
@@ -339,13 +339,22 @@ void clearLEDMatrix() {
 void setGameParameters() {
   // We first check in which interval we are
   for(byte i = 0; i < gameParametersTablesSize-1; i++) {
-    if(playerAdvancement > intervalesT[i] && playerAdvancement <= intervalesT[i+1]) {
+    if(playerAdvancement >= intervalesT[i] && playerAdvancement < intervalesT[i+1]) {
       
       // Given the interval where we are, we set the game variable linearly between the values set.
-      screenMoves = frameRateT[i] + ((frameRateT[i+1] - frameRateT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]);
-      probaApparitionLigne = probaApparitionLigneT[i] + ((probaApparitionLigneT[i+1] - probaApparitionLigneT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]);
-      probaApparitionBlock = probaApparitionBlockT[i] + ((probaApparitionBlockT[i+1] - probaApparitionBlockT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]);
-
+      screenMoves = frameRateT[i] + (((frameRateT[i+1] - frameRateT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
+      probaApparitionLigne = probaApparitionLigneT[i] + (((probaApparitionLigneT[i+1] - probaApparitionLigneT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
+      probaApparitionBlock = probaApparitionBlockT[i] + (((probaApparitionBlockT[i+1] - probaApparitionBlockT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
+      Serial.println("playerAdvancement : ");
+      Serial.println(playerAdvancement);
+      Serial.println("i : ");
+      Serial.println(i);
+      Serial.println("screenMoves : ");
+      Serial.println(screenMoves);
+      Serial.println("probaApparitionLigne :");
+      Serial.println(probaApparitionLigne);
+      Serial.println("probaApparitionBlock :");
+      Serial.println(probaApparitionBlock);
     }
   }
 }
