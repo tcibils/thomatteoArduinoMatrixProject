@@ -171,8 +171,8 @@ byte numberTable[10][5][3] {
 };
 
 
-byte gamePadMode = 1;                             // 0 means using my home-made gamepad, 1 means using an SNES gamepad
-const byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
+const byte gamePadMode = 1;                             // 0 means using my home-made gamepad, 1 means using an SNES gamepad
+byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
