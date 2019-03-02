@@ -177,25 +177,33 @@ byte gameStatus = 0;                        // 0 means we're playing, 1 means it
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
 // ---------------------------------------------
-const byte probaApparitionLigne = 70;             // Probability of a new line appearing when possible
-const byte probaApparitionBlock = 40;             // For a new line, for each block, the probability of it being a "wall"
-unsigned const int startScreenMoves = 300;        // Speed of the car at start of the game
-unsigned const int screenMovesMini = 100;         // Maximum speed of the game
+// unsigned const int startScreenMoves = 300;        // Speed of the car at start of the game
+// unsigned const int screenMovesMini = 100;         // Maximum speed of the game
 const byte speedIncreaseMode = 0;                 // If it's 1, the player jumps levels and the car speeds at defined point in time. If it's 0, the car speed augments lineraly.
 const byte accelaration = 1;                      // The rate at which the game will accelerate
 
 const byte initialCarPosition = 3;                // Car position on the bootom line of the LED matrix (so the column)
 const byte initialTicker = 5;                     // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 unsigned const int initialPlayerScore = 0;        // Will count the number of lines the player passed.
+unsigned const int initialPlayerAdvancement = 0;  // See player Advancement
+
+unsigned const int intervalesT[11] = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
+unsigned const int frameRateT[11] = {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
+unsigned const byte probaApparitionLineT[11] = {80, 70, 60, 50, 50, 60, 70, 80, 90, 90, 90};
+unsigned const byte probaApparitionBlockT[11] = {70, 60, 50, 40, 40, 40, 50, 60, 70, 80, 90};
+
 
 // ---------------------------------------------
 // ----------- MODIFIED GAME VARIABLES ---------
 // ---------------------------------------------
 byte carPosition = initialCarPosition;            // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                      // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
-unsigned int screenMoves = startScreenMoves;      // In miliseconds, how fast will the car go. That will be updated during the game.
-unsigned int playerScore = initialPlayerScore;    // Will count the number of lines the player passed. SHOULD NOT BE MODIFED
+unsigned int playerScore = initialPlayerScore;    // Will count the number of lines the player passed (points)
+unsigned int playerAdvancement = initialPlayerAdvancement;     // Will be like the player score but not exactly. Will not be increased when under a star effect. We'll use this to augment game difficulty.
 
+unsigned int screenMoves = frameRateT[0];               // In miliseconds, how fast will the car go. That will be updated during the game.
+byte probaApparitionLigne = probaApparitionLineT[0];    // Probability of a new line appearing when possible
+byte probaApparitionBlock = probaApparitionBlockT[0];   // For a new line, for each block, the probability of it being a "wall"
 
 
 void setup() {
@@ -228,6 +236,7 @@ void setup() {
 Star
 Variability of parameters with player score : proba apparition lines, proba apprition block
 Letting the player change the acceleration with up/down buttons
+Make the matrix size abstract
 Music ?
 */
 
@@ -302,6 +311,7 @@ void loop() {
         addLineTopMatrix(newLine);
       
         playerScore++;
+        playerAdvancement++;
       }
     }
   }
@@ -621,8 +631,12 @@ void reinitializeGame() {
   // We repass modified game variables to their initial positions
   carPosition = initialCarPosition;
   ticker = initialTicker;          
-  screenMoves = startScreenMoves;  
   playerScore = initialPlayerScore;
+  playerAdvancement = initialPlayerAdvancement;     // Will be like the player score but not exactly. Will not be increased when under a star effect. We'll use this to augment game difficulty.
+
+  screenMoves = frameRateT[0];               // In miliseconds, how fast will the car go. That will be updated during the game.
+  probaApparitionLigne = probaApparitionLineT[0];    // Probability of a new line appearing when possible
+  probaApparitionBlock = probaApparitionBlockT[0];   // For a new line, for each block, the probability of it being a "wall"
 
   // We set the game status to "play"
   gameStatus = 0;
