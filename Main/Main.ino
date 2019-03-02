@@ -234,7 +234,6 @@ void setup() {
 
 /* 
 Star
-Variability of parameters with player score : proba apparition lines, proba apprition block : we think formulas are OK, but it's not working. Check rounding ?
 Letting the player change the acceleration with up/down buttons
 Make the matrix size abstract
 Music ?
@@ -252,6 +251,7 @@ void loop() {
     
       // If the button "left" has been pushed, then the car goes left one column
       if(leftButtonPushed == 1) {
+        Serial.println("Left pushed");
         if(carPosition > 0) {
           carPosition--;
         }
@@ -259,6 +259,8 @@ void loop() {
     
       // If the button "right" has been pushed, then the car goes right one column
       if(rightButtonPushed == 1) {
+        
+        Serial.println("Right pushed");
         if(carPosition <5) {
           carPosition++;
         }
@@ -342,9 +344,22 @@ void setGameParameters() {
     if(playerAdvancement >= intervalesT[i] && playerAdvancement < intervalesT[i+1]) {
       
       // Given the interval where we are, we set the game variable linearly between the values set.
-      screenMoves = frameRateT[i] + (((frameRateT[i+1] - frameRateT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
-      probaApparitionLigne = probaApparitionLigneT[i] + (((probaApparitionLigneT[i+1] - probaApparitionLigneT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
-      probaApparitionBlock = probaApparitionBlockT[i] + (((probaApparitionBlockT[i+1] - probaApparitionBlockT[i]) / (intervalesT[i+1] - intervalesT[i])) * (playerAdvancement - intervalesT[i]));
+      
+      int frameDivisionElementOne = (frameRateT[i+1] - frameRateT[i]);
+      int frameDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      float frameGradient = (float)(frameDivisionElementOne/frameDivisionElementTwo);
+      screenMoves = frameRateT[i] + (frameGradient * (playerAdvancement - intervalesT[i]));
+
+      int ligneDivisionElementOne = (probaApparitionLigneT[i+1] - probaApparitionLigneT[i]);
+      int ligneDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      float ligneGradient = (ligneDivisionElementOne / ligneDivisionElementTwo);
+      probaApparitionLigne = probaApparitionLigneT[i] + (ligneGradient * (playerAdvancement - intervalesT[i]));
+
+      int blockDivisionElementOne = (probaApparitionBlockT[i+1] - probaApparitionBlockT[i]);
+      int blockDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      float blockGradient = (blockDivisionElementOne / blockDivisionElementTwo);
+      probaApparitionBlock = probaApparitionBlockT[i] + (blockGradient * (playerAdvancement - intervalesT[i]));
+      /*
       Serial.println("playerAdvancement : ");
       Serial.println(playerAdvancement);
       Serial.println("i : ");
@@ -355,6 +370,7 @@ void setGameParameters() {
       Serial.println(probaApparitionLigne);
       Serial.println("probaApparitionBlock :");
       Serial.println(probaApparitionBlock);
+      */
     }
   }
 }
