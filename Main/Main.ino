@@ -177,20 +177,20 @@ byte gameStatus = 0;                        // 0 means we're playing, 1 means it
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
 // ---------------------------------------------
-// unsigned const int startScreenMoves = 300;        // Speed of the car at start of the game
-// unsigned const int screenMovesMini = 100;         // Maximum speed of the game
-const byte accelaration = 1;                      // The rate at which the game will accelerate
-
 const byte initialCarPosition = 3;                // Car position on the bootom line of the LED matrix (so the column)
 const byte initialTicker = 5;                     // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 unsigned const int initialPlayerScore = 0;        // Will count the number of lines the player passed.
 unsigned const int initialPlayerAdvancement = 0;  // See player Advancement
 
-const byte gameParametersTablesSize = 11;
-unsigned const int intervalesT[gameParametersTablesSize] = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500};
-unsigned const int frameRateT[gameParametersTablesSize] = {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
-const byte probaApparitionLigneT[gameParametersTablesSize] = {80, 70, 60, 50, 50, 60, 70, 80, 90, 90, 90};
-const byte probaApparitionBlockT[gameParametersTablesSize] = {70, 60, 50, 40, 40, 40, 50, 60, 70, 80, 90};
+const byte gameParametersTablesSize = 11;         // Size of tables below
+unsigned const int intervalesT[gameParametersTablesSize] =   {0,   50,  100, 150, 200, 250, 300, 350, 400, 450, 500};
+unsigned const int frameRateT[gameParametersTablesSize] =    {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
+const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,  50,  60,  70,  80,  90,  90,  90};
+const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
+
+// We will check the player advancement, and locate ourselves in the interval table defined
+// Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
+// See function setGameParameters();
 
 
 // ---------------------------------------------
@@ -198,7 +198,7 @@ const byte probaApparitionBlockT[gameParametersTablesSize] = {70, 60, 50, 40, 40
 // ---------------------------------------------
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
-unsigned int playerScore = initialPlayerScore;              // Will count the number of lines the player passed (points)
+unsigned int playerScore = initialPlayerScore;              // Will count the number of lines the player passed (points), and display it at end of the game
 unsigned int playerAdvancement = initialPlayerAdvancement;  // Will be like the player score but not exactly. Will not be increased when under a star effect. We'll use this to augment game difficulty.
 
 unsigned int screenMoves = frameRateT[0];                   // In miliseconds, how fast will the car go. That will be updated during the game.
@@ -344,22 +344,28 @@ void setGameParameters() {
     if(playerAdvancement >= intervalesT[i] && playerAdvancement < intervalesT[i+1]) {
       
       // Given the interval where we are, we set the game variable linearly between the values set.
-      
+      // The breakdown below is necessary to make it work, due to how rounding is done in Arduino (I'm not fully sure of that)
+
+      // Setting frame rate, so speed of the game
       int frameDivisionElementOne = (frameRateT[i+1] - frameRateT[i]);
       int frameDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
       float frameGradient = (float)(frameDivisionElementOne/frameDivisionElementTwo);
       screenMoves = frameRateT[i] + (frameGradient * (playerAdvancement - intervalesT[i]));
 
+      // Setting the proba that a new line appears
       int ligneDivisionElementOne = (probaApparitionLigneT[i+1] - probaApparitionLigneT[i]);
       int ligneDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
       float ligneGradient = (ligneDivisionElementOne / ligneDivisionElementTwo);
       probaApparitionLigne = probaApparitionLigneT[i] + (ligneGradient * (playerAdvancement - intervalesT[i]));
 
+      // Setting the proba for the number of blocks in a new line having appeared.
       int blockDivisionElementOne = (probaApparitionBlockT[i+1] - probaApparitionBlockT[i]);
       int blockDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
       float blockGradient = (blockDivisionElementOne / blockDivisionElementTwo);
       probaApparitionBlock = probaApparitionBlockT[i] + (blockGradient * (playerAdvancement - intervalesT[i]));
+      
       /*
+      // Debugging
       Serial.println("playerAdvancement : ");
       Serial.println(playerAdvancement);
       Serial.println("i : ");
