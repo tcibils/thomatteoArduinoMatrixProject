@@ -357,10 +357,12 @@ void loop() {
         starDuration--;
       }
     }
+    if(starDuration == 10){
+      ticker = 10; // Before star is over, give 10 empty rows      
+    }
     if(starDuration == 0) {
       gameStatus = 0;
       starDuration = initialStarDuration;
-      ticker = initialTicker; // When star is over, give again 5 empty rows
     }
   }
 
