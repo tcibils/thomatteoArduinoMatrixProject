@@ -242,8 +242,8 @@ void setup() {
 
 
 /* 
-Star
-Adapting limits score
+Add star feedback when crashing a wall
+Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it
 Music ?
