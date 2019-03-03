@@ -181,6 +181,7 @@ const byte initialCarPosition = 3;                // Car position on the bootom 
 const byte initialTicker = 5;                     // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 unsigned const int initialPlayerScore = 0;        // Will count the number of lines the player passed.
 unsigned const int initialPlayerAdvancement = 0;  // See player Advancement
+const byte initialStarDuration = 50;
 
 const byte gameParametersTablesSize = 11;         // Size of tables below
 unsigned const int intervalesT[gameParametersTablesSize] =   {0,   50,  100, 150, 200, 250, 300, 350, 400, 450, 500};
@@ -198,6 +199,7 @@ const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,
 // ---------------------------------------------
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
+byte starDuration = initialStarDuration;                    // Duration left for the star.
 unsigned int playerScore = initialPlayerScore;              // Will count the number of lines the player passed (points), and display it at end of the game
 unsigned int playerAdvancement = initialPlayerAdvancement;  // Will be like the player score but not exactly. Will not be increased when under a star effect. We'll use this to augment game difficulty.
 
@@ -296,12 +298,57 @@ void loop() {
 
   // The player got a star !
   if(gameStatus == 2) {
-    screenMoves = 75;
-    probaApparitionLigne = 95;
-    probaApparitionBlock = 95;
-
-    
-    
+    if(starDuration > 0) {
+      screenMoves = 75;
+      probaApparitionLigne = 95;
+      probaApparitionBlock = 95;
+  
+      // Every x miliseconds, we make an iteration.
+      if(millis() - lastMillis > screenMoves) {
+      
+        changeCarPosition();
+      
+        // We create the new line we'll put on top of our game
+        byte newLine[6] = {0,0,0,0,0,0};
+        
+        // If the ticker is 0, meaning we can create a new line with blocks
+        if(ticker == 0) {
+          // We'll check how many blocks we create
+          byte blockedSpacesCounter = 0;
+          // We have a proba to pop a new line or not
+          if(random(100) < probaApparitionLigne) {
+            byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
+            // And we try to generate blocks
+            for(byte counter = 0; counter < 6; counter++) {
+              // Each having a random proba of appearing
+                if(random(100) < probaApparitionBlock && freePassage != counter) {
+                  newLine[counter] = Wall;
+                  blockedSpacesCounter++;
+              }
+            }
+          }
+          ticker = blockedSpacesCounter + 1;
+        }
+      
+        if(ticker > 0) {
+          ticker--;
+        }
+        
+        lastMillis = millis();
+        leftButtonPushed = 0;
+        rightButtonPushed = 0;
+        
+        pushLinesDown();
+        displayScoreInGame();
+        addLineTopMatrix(newLine);
+        playerScore++;
+        starDuration--;
+      }
+    }
+    if(starDuration == 0) {
+      gameStatus = 0;
+      starDuration = initialStarDuration;
+    }
   }
 
   // If it's game over
@@ -589,7 +636,8 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Wall)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
@@ -601,7 +649,8 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Purple) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Purple;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
