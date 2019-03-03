@@ -190,6 +190,9 @@ unsigned const int frameRateT[gameParametersTablesSize] =    {250, 200, 150, 100
 const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,  50,  60,  70,  80,  90,  90,  90};
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
 const byte averageLinesApparitionStar = 10;      // How many lines in average before a star appears
+const byte frameRateStar = 70;
+const byte probaApparitionLigneStar = 90;
+const byte probaApparitionBlockStar = 90;
 
 // We will check the player advancement, and locate ourselves in the interval table defined
 // Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
@@ -307,9 +310,9 @@ void loop() {
   // The player got a star !
   if(gameStatus == 2) {
     if(starDuration > 0) {
-      screenMoves = 75;
-      probaApparitionLigne = 95;
-      probaApparitionBlock = 95;
+      screenMoves = frameRateStar;
+      probaApparitionLigne = probaApparitionLigneStar;
+      probaApparitionBlock = probaApparitionBlockStar;
   
       // Every x miliseconds, we make an iteration.
       if(millis() - lastMillis > screenMoves) {
@@ -357,6 +360,7 @@ void loop() {
     if(starDuration == 0) {
       gameStatus = 0;
       starDuration = initialStarDuration;
+      ticker = initialTicker; // When star is over, give again 5 empty rows
     }
   }
 
