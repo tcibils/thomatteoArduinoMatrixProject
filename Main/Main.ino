@@ -56,6 +56,7 @@ const byte Blue = 2;
 const byte Red = 3;
 const byte Green = 4;
 const byte Star = 5;
+const byte Yellow = 5;
 const byte Car = 6;
 
 
@@ -189,10 +190,11 @@ unsigned const int intervalesT[gameParametersTablesSize] =   {0,   50,  100, 150
 unsigned const int frameRateT[gameParametersTablesSize] =    {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
 const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,  50,  60,  70,  80,  90,  90,  90};
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
-const byte averageLinesApparitionStar = 60;      // How many lines in average before a star appears
+const byte averageLinesApparitionStar = 10;      // How many lines in average before a star appears
 const byte frameRateStar = 70;
 const byte probaApparitionLigneStar = 50;
 const byte probaApparitionBlockStar = 50;
+const byte wallCrashPointsWhileStar = 100;
 
 // We will check the player advancement, and locate ourselves in the interval table defined
 // Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
@@ -613,7 +615,7 @@ void checkCarCrashOrStar() {
     gameStatus = 2;   // Meaning star mode on
   }
   if(gameStatus == 2 && LEDMatrix[9][carPosition] != Black) {
-    playerScore = playerScore + 5;
+    playerScore = playerScore + wallCrashPointsWhileStar;
   }
 }
 
@@ -663,6 +665,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 6)     {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
@@ -677,6 +680,7 @@ void outputDisplay() {
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 6)     {leds[columnIndex*displayNumberOfRows + rowIndex].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
