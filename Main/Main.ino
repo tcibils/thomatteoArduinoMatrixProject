@@ -171,8 +171,8 @@ byte numberTable[10][5][3] {
 };
 
 
-const byte gamePadMode = 0;                             // 0 means using my home-made gamepad, 1 means using an SNES gamepad
-byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over
+const byte gamePadMode = 0;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
+byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over, 2 means the player got a star
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
@@ -250,22 +250,7 @@ void loop() {
     // Every x miliseconds, we make an iteration.
     if(millis() - lastMillis > screenMoves) {
     
-      // If the button "left" has been pushed, then the car goes left one column
-      if(leftButtonPushed == 1) {
-        Serial.println("Left pushed");
-        if(carPosition > 0) {
-          carPosition--;
-        }
-      }
-    
-      // If the button "right" has been pushed, then the car goes right one column
-      if(rightButtonPushed == 1) {
-        
-        Serial.println("Right pushed");
-        if(carPosition <5) {
-          carPosition++;
-        }
-      }
+      changeCarPosition();
     
       // We create the new line we'll put on top of our game
       byte newLine[6] = {0,0,0,0,0,0};
@@ -309,6 +294,16 @@ void loop() {
     }
   }
 
+  // The player got a star !
+  if(gameStatus == 2) {
+    screenMoves = 75;
+    probaApparitionLigne = 95;
+    probaApparitionBlock = 95;
+
+    
+    
+  }
+
   // If it's game over
   if(gameStatus == 1) {
     // We update the LED matrix with the player score
@@ -335,6 +330,22 @@ void clearLEDMatrix() {
   for (byte i = 0; i < displayNumberOfRows; i++)  {
     for (byte j = 0; j < displayNumberOfColumns; j++) {
       LEDMatrix[i][j] = Black;
+    }
+  }
+}
+
+void changeCarPosition() {
+    // If the button "left" has been pushed, then the car goes left one column
+  if(leftButtonPushed == 1) {
+    if(carPosition > 0) {
+      carPosition--;
+    }
+  }
+
+  // If the button "right" has been pushed, then the car goes right one column
+  if(rightButtonPushed == 1) {
+    if(carPosition <5) {
+      carPosition++;
     }
   }
 }
