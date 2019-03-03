@@ -189,7 +189,7 @@ unsigned const int intervalesT[gameParametersTablesSize] =   {0,   50,  100, 150
 unsigned const int frameRateT[gameParametersTablesSize] =    {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
 const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,  50,  60,  70,  80,  90,  90,  90};
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
-const byte averageLinesApparitionStar = 200;      // How many lines in average before a star appears
+const byte averageLinesApparitionStar = 10;      // How many lines in average before a star appears
 
 // We will check the player advancement, and locate ourselves in the interval table defined
 // Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
@@ -275,12 +275,11 @@ void loop() {
             }
           }
         }
+        // If the player is lucky, then a star will appear on the new line
+        if(random(averageLinesApparitionStar+1) == averageLinesApparitionStar) {
+          newLine[random(6)] = Star;
+        }
         ticker = blockedSpacesCounter + 1;
-      }
-
-      // If the player is lucky, then a star will appear on the new line
-      if(random(201) == averageLinesApparitionStar) {
-        newLine[random(6)] = Star;
       }
 
       if(ticker > 0) {
