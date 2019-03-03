@@ -234,8 +234,9 @@ void setup() {
 
 /* 
 Star
-Letting the player change the acceleration with up/down buttons
+Adapting limits score
 Make the matrix size abstract
+Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it
 Music ?
 */
 
@@ -341,6 +342,7 @@ void clearLEDMatrix() {
 void setGameParameters() {
   // We first check in which interval we are
   for(byte i = 0; i < gameParametersTablesSize-1; i++) {
+     // If the player score is above the higher than the highest interval in the table, we won't enter the if, thus the values won't change and will be at max.
     if(playerAdvancement >= intervalesT[i] && playerAdvancement < intervalesT[i+1]) {
       
       // Given the interval where we are, we set the game variable linearly between the values set.
@@ -363,21 +365,8 @@ void setGameParameters() {
       const int blockDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
       const float blockGradient = (blockDivisionElementOne / blockDivisionElementTwo);
       probaApparitionBlock = probaApparitionBlockT[i] + (blockGradient * (playerAdvancement - intervalesT[i]));
-      
-      /*
-      // Debugging
-      Serial.println("playerAdvancement : ");
-      Serial.println(playerAdvancement);
-      Serial.println("i : ");
-      Serial.println(i);
-      Serial.println("screenMoves : ");
-      Serial.println(screenMoves);
-      Serial.println("probaApparitionLigne :");
-      Serial.println(probaApparitionLigne);
-      Serial.println("probaApparitionBlock :");
-      Serial.println(probaApparitionBlock);
-      */
-    }
+     }
+
   }
 }
 
