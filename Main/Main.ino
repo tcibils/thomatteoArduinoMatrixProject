@@ -191,8 +191,8 @@ const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
 const byte averageLinesApparitionStar = 60;      // How many lines in average before a star appears
 const byte frameRateStar = 70;
-const byte probaApparitionLigneStar = 90;
-const byte probaApparitionBlockStar = 90;
+const byte probaApparitionLigneStar = 50;
+const byte probaApparitionBlockStar = 50;
 
 // We will check the player advancement, and locate ourselves in the interval table defined
 // Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
@@ -350,15 +350,16 @@ void loop() {
         rightButtonPushed = 0;
         
         pushLinesDown();
-        displayScoreInGame();
+        checkCarCrashOrStar();
         showCar();
+        displayScoreInGame();
         addLineTopMatrix(newLine);
         playerScore++;
         starDuration--;
       }
     }
-    if(starDuration == 10){
-      ticker = 10; // Before star is over, give 10 empty rows      
+    if(starDuration == 5){
+      ticker = 5; // Before star is over, give 5 empty rows      
     }
     if(starDuration == 0) {
       gameStatus = 0;
@@ -604,12 +605,15 @@ void pushLinesDown() {
 }
 
 void checkCarCrashOrStar() {
-  // We check if the car hit something or got the star
-  if(LEDMatrix[9][carPosition] != Black && LEDMatrix[9][carPosition] != Star) {
+  // We check if the car hit something or got the star, or in star mode check if the car crashes a wall and add 5 points
+  if(gameStatus == 0 && LEDMatrix[9][carPosition] != Black && LEDMatrix[9][carPosition] != Star) {
     gameStatus = 1;   // Meaning game over
   }    
-  if(LEDMatrix[9][carPosition] == Star) {
+  if(gameStatus == 0 && LEDMatrix[9][carPosition] == Star) {
     gameStatus = 2;   // Meaning star mode on
+  }
+  if(gameStatus == 2 && LEDMatrix[9][carPosition] != Black) {
+    playerScore = playerScore + 5;
   }
 }
 
@@ -710,7 +714,7 @@ void displayScore() {
 
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
     for(byte columnIterator = 0; columnIterator < 3; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = White * numberTable[thousands][rowIterator][columnIterator];  
+         LEDMatrix[rowIterator][columnIterator] = Green * numberTable[thousands][rowIterator][columnIterator];  
     }
   }
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
@@ -725,7 +729,7 @@ void displayScore() {
   }
   for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
     for(byte columnIterator = 3; columnIterator < 6; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = White * numberTable[units][rowIterator-5][columnIterator-3];  
+         LEDMatrix[rowIterator][columnIterator] = Green * numberTable[units][rowIterator-5][columnIterator-3];  
     }
   }
 
