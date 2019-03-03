@@ -347,21 +347,21 @@ void setGameParameters() {
       // The breakdown below is necessary to make it work, due to how rounding is done in Arduino (I'm not fully sure of that)
 
       // Setting frame rate, so speed of the game
-      int frameDivisionElementOne = (frameRateT[i+1] - frameRateT[i]);
-      int frameDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
-      float frameGradient = (float)(frameDivisionElementOne/frameDivisionElementTwo);
+      const int frameDivisionElementOne = (frameRateT[i+1] - frameRateT[i]);
+      const int frameDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      const float frameGradient = (float)(frameDivisionElementOne/frameDivisionElementTwo);
       screenMoves = frameRateT[i] + (frameGradient * (playerAdvancement - intervalesT[i]));
 
       // Setting the proba that a new line appears
-      int ligneDivisionElementOne = (probaApparitionLigneT[i+1] - probaApparitionLigneT[i]);
-      int ligneDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
-      float ligneGradient = (ligneDivisionElementOne / ligneDivisionElementTwo);
+      const int ligneDivisionElementOne = (probaApparitionLigneT[i+1] - probaApparitionLigneT[i]);
+      const int ligneDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      const float ligneGradient = (ligneDivisionElementOne / ligneDivisionElementTwo);
       probaApparitionLigne = probaApparitionLigneT[i] + (ligneGradient * (playerAdvancement - intervalesT[i]));
 
       // Setting the proba for the number of blocks in a new line having appeared.
-      int blockDivisionElementOne = (probaApparitionBlockT[i+1] - probaApparitionBlockT[i]);
-      int blockDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
-      float blockGradient = (blockDivisionElementOne / blockDivisionElementTwo);
+      const int blockDivisionElementOne = (probaApparitionBlockT[i+1] - probaApparitionBlockT[i]);
+      const int blockDivisionElementTwo = (intervalesT[i+1] - intervalesT[i]);
+      const float blockGradient = (blockDivisionElementOne / blockDivisionElementTwo);
       probaApparitionBlock = probaApparitionBlockT[i] + (blockGradient * (playerAdvancement - intervalesT[i]));
       
       /*
