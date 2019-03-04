@@ -257,9 +257,8 @@ Music ?
 Bugs corrigés:
 - mort avec un mur juste à la fin de l'étoile... -> augmenté ticker après étoile... => Done, I guess. Faut tester!
 - upButton ne marche pas -> NO IDEA! :/
-
 Autre:
-- réduire fréquence murs avec étoile mais pas largeur murs=> Done. Faut tester si c'est toujours bien pour l'utilisateur!
+- réduire fréquence murs avec étoile mais pas largeur murs => Done. Faut tester si c'est toujours bien pour l'utilisateur!
 */
 
 
@@ -271,24 +270,17 @@ void loop() {
     
     // Every x miliseconds, we make an iteration.
     if(millis() - lastMillis > screenMoves) {
-    
       changeCarPosition();
-
       createNewLine();
-
       lastMillis = millis();
-
       pushLinesDown();
       checkCarCrashOrStar();
 
       if(gameStatus == 0) {
         showCar();
-        
         changeScoreDisplayMode();
         displayScoreInGame();
-        
         addLineTopMatrix();
-      
         playerScore++;
         playerAdvancement++;
       }
@@ -301,22 +293,15 @@ void loop() {
   
       // Every x miliseconds, we make an iteration.
       if(millis() - lastMillis > screenMoves) {
-      
         changeCarPosition();
-
         createNewLine();
-        
         lastMillis = millis();
-
         pushLinesDown();
         checkCarCrashOrStar();
         showCar();
-        
         changeScoreDisplayMode();
         displayScoreInGame();
-        
         addLineTopMatrix();
-        
         playerScore++;
         starDuration--;
       }
@@ -506,13 +491,13 @@ void checkButtons() {
     }
    
     if(btns & BTN_LEFT) {
-        leftButtonPushed = 1;
-        rightButtonPushed = 0;
+      leftButtonPushed = 1;
+      rightButtonPushed = 0;
     }
    
     if(btns & BTN_RIGHT){
-        leftButtonPushed = 0;
-        rightButtonPushed = 1;
+      leftButtonPushed = 0;
+      rightButtonPushed = 1;
     }
     /* 
     if(btns & BTN_L)
