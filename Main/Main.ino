@@ -192,9 +192,9 @@ const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
 const byte averageLinesApparitionStar = 60;      // How many lines in average before a star appears
 const byte frameRateStar = 70;
-const byte probaApparitionLigneStar = 50;
-const byte probaApparitionBlockStar = 50;
-const byte wallCrashPointsWhileStar = 5;
+const byte probaApparitionLigneStar = 20;
+const byte probaApparitionBlockStar = 40;
+const byte wallCrashPointsWhileStar = 10;
 
 // We will check the player advancement, and locate ourselves in the interval table defined
 // Then, we will adjust the frame rate (speed of the game), proba of line apparition, and proba of block apparition
@@ -253,6 +253,13 @@ Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it => Ca m'a l'air méga chaud à résoudre
 Music ?
+
+Bugs corrigés:
+- mort avec un mur juste à la fin de l'étoile... -> augmenté ticker après étoile... => Done, I guess. Faut tester!
+- upButton ne marche pas -> NO IDEA! :/
+
+Autre:
+- réduire fréquence murs avec étoile mais pas largeur murs=> Done. Faut tester si c'est toujours bien pour l'utilisateur!
 */
 
 
@@ -314,8 +321,8 @@ void loop() {
         starDuration--;
       }
     }
-    if(starDuration == 5){
-      ticker = 5; // Before star is over, give 5 empty rows      
+    if(starDuration == displayNumberOfRows){
+      ticker = displayNumberOfRows; // Before star is over, give a full screen of empty rows
     }
     if(starDuration == 0) {
       gameStatus = 0;
