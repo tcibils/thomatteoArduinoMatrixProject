@@ -248,7 +248,7 @@ void setup() {
 Add star feedback when crashing a wall => Done, I guess. Faut tester!
 FLash walls when Star mode => Done, I guess. Faut tester!
 Add alternative score mode in binary => Done, I guess. Faut tester!
-Add a way to toggle score mode by pressing up button in game
+Add a way to toggle score mode by pressing up button in game => Done, I guess. Faut tester!
 Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it => Ca m'a l'air méga chaud à résoudre
