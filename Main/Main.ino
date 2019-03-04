@@ -243,11 +243,11 @@ void setup() {
 
 
 /* 
-Add star feedback when crashing a wall (test comment)
-FLash walls when Star mode
+Add star feedback when crashing a wall => Done, I guess. Faut tester!
+FLash walls when Star mode => Done, I guess. Faut tester!
 Add star music
 Make the matrix size abstract
-Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it
+Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it => Ca m'a l'air méga chaud à résoudre
 Music ?
 */
 
