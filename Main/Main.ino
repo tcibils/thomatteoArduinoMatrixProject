@@ -96,6 +96,7 @@ unsigned int lastBButtonValue = LOW;
 
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
+byte upButtonPushed = 0;
 byte aButtonPushed = 0;
 byte bButtonPushed = 0;
 
@@ -174,7 +175,6 @@ byte numberTable[10][5][3] {
 
 
 const byte gamePadMode = 0;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
-const byte scoreDisplayMode = 1;            // 0 means using a decimal score display mode (100-200-300...600), 1 means using a binary score display mode (10-20-40..320)
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
@@ -205,6 +205,7 @@ const byte wallCrashPointsWhileStar = 5;
 // ----------- MODIFIED GAME VARIABLES ---------
 // ---------------------------------------------
 byte gameStatus = 0;                                        // 0 means we're playing, 1 means it's game over, 2 means the player got a star
+byte scoreDisplayMode = 1;                                  // 0 means using a decimal score display mode (100-200-300...600), 1 means using a binary score display mode (10-20-40..320)
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte newLine[displayNumberOfColumns] = {0,0,0,0,0,0};       // The new line that will be added at each iteration
@@ -269,15 +270,16 @@ void loop() {
       createNewLine();
 
       lastMillis = millis();
-      leftButtonPushed = 0;
-      rightButtonPushed = 0;
 
       pushLinesDown();
       checkCarCrashOrStar();
 
       if(gameStatus == 0) {
         showCar();
+        
+        changeScoreDisplayMode();
         displayScoreInGame();
+        
         addLineTopMatrix();
       
         playerScore++;
@@ -298,14 +300,16 @@ void loop() {
         createNewLine();
         
         lastMillis = millis();
-        leftButtonPushed = 0;
-        rightButtonPushed = 0;
-        
+
         pushLinesDown();
         checkCarCrashOrStar();
         showCar();
+        
+        changeScoreDisplayMode();
         displayScoreInGame();
+        
         addLineTopMatrix();
+        
         playerScore++;
         starDuration--;
       }
@@ -359,6 +363,7 @@ void changeCarPosition() {
   if(leftButtonPushed == 1) {
     if(carPosition > 0) {
       carPosition--;
+      leftButtonPushed = 0;
     }
   }
 
@@ -366,6 +371,7 @@ void changeCarPosition() {
   if(rightButtonPushed == 1) {
     if(carPosition <5) {
       carPosition++;
+      rightButtonPushed = 0;
     }
   }
 }
@@ -483,16 +489,15 @@ void checkButtons() {
     else
       Serial.print(F("----- "));
    
-    if(btns & BTN_UP)
-      Serial.print(F("UP "));
-    else
-      Serial.print(F("-- "));
-   
     if(btns & BTN_DOWN)
       Serial.print(F("DOWN "));
     else
       Serial.print(F("---- "));
    */
+    if(btns & BTN_UP) {
+      upButtonPushed = 1;
+    }
+   
     if(btns & BTN_LEFT) {
         leftButtonPushed = 1;
         rightButtonPushed = 0;
@@ -539,6 +544,15 @@ void checkButtons() {
       }
     }
     lastRightButtonValue = rightButtonValue; // And we update what we read just after
+
+    // Up is used to Change the Score Display Mode from decimal (100-200-300...600) to binary (10-20-40...320)
+    upButtonValue = analogRead(upButton);
+    if (upButtonValue < 200 && lastUpButtonValue > 800) { 
+      if(gameStatus == 0 || gameStatus == 2) {
+        upButtonPushed = 1;
+      }
+    }
+    lastUpButtonValue = upButtonValue; // And we update what we read just after
   
     // A and B buttons are only used if we're in game over, to restart the game.
     aButtonValue = analogRead(aButton);
@@ -634,6 +648,14 @@ void showCarCrashingWall() {
     LEDMatrix[displayNumberOfRows-1][carPosition-1] = Yellow;
     LEDMatrix[displayNumberOfRows-2][carPosition] = Yellow;
     LEDMatrix[displayNumberOfRows-2][carPosition-1] = Yellow;
+  }
+}
+
+void changeScoreDisplayMode() {
+  // If the button "up" has been pushed, then we change the score display mode
+  if(upButtonPushed == 1) {
+    scoreDisplayMode = (scoreDisplayMode+1)%2;
+    upButtonPushed = 0;
   }
 }
 
