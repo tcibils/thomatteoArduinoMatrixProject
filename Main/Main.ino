@@ -174,7 +174,7 @@ byte numberTable[10][5][3] {
 
 
 const byte gamePadMode = 0;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
-byte gameStatus = 0;                        // 0 means we're playing, 1 means it's game over, 2 means the player got a star
+const byte scoreDisplayMode = 1;            // 0 means using a decimal score display mode (100-200-300...600), 1 means using a binary score display mode (10-20-40..320)
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
@@ -204,6 +204,7 @@ const byte wallCrashPointsWhileStar = 5;
 // ---------------------------------------------
 // ----------- MODIFIED GAME VARIABLES ---------
 // ---------------------------------------------
+byte gameStatus = 0;                                        // 0 means we're playing, 1 means it's game over, 2 means the player got a star
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte newLine[displayNumberOfColumns] = {0,0,0,0,0,0};       // The new line that will be added at each iteration
@@ -245,6 +246,8 @@ void setup() {
 /* 
 Add star feedback when crashing a wall => Done, I guess. Faut tester!
 FLash walls when Star mode => Done, I guess. Faut tester!
+Add alternative score mode in binary => Done, I guess. Faut tester!
+Add a way to toggle score mode by pressing up button in game
 Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it => Ca m'a l'air méga chaud à résoudre
@@ -275,7 +278,7 @@ void loop() {
       if(gameStatus == 0) {
         showCar();
         displayScoreInGame();
-        addLineTopMatrix(newLine);
+        addLineTopMatrix();
       
         playerScore++;
         playerAdvancement++;
@@ -302,7 +305,7 @@ void loop() {
         checkCarCrashOrStar();
         showCar();
         displayScoreInGame();
-        addLineTopMatrix(newLine);
+        addLineTopMatrix();
         playerScore++;
         starDuration--;
       }
@@ -636,24 +639,41 @@ void showCarCrashingWall() {
 
 void displayScoreInGame() {
   // On top of the top, we create a line for the score
-  byte LEDSon = playerScore/100;
-  byte lastLed = playerScore%100;
-  
-  for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
-    // We plot 1 blue dot for each 100 points the player has
-    if(columnIterator < LEDSon) {
-      LEDMatrix[0][columnIterator] = Red;
+  if(scoreDisplayMode == 0) {
+    byte LEDSon = playerScore/100;
+    byte lastLed = playerScore%100;
+    
+    for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+      // We plot 1 red dot for each 100 points the player has
+      if(columnIterator < LEDSon) {
+        LEDMatrix[0][columnIterator] = Red;
+      }
+      // And we get the last dot to get more and more red, as the score goes up
+      if(columnIterator == LEDSon) {
+        LEDMatrix[0][columnIterator] = lastLed;
+      }   
+    }    
+  }
+  if(scoreDisplayMode == 1) {
+    byte binaryScoreLEDs[6] = {1,1,1,1,1,1}; // we write down the number in binary, with 10 as a unit: 10-20-40-80-160-320
+    if(playerScore < 630) {
+      binaryScoreLEDs[5] = playerScore / 320;
+      binaryScoreLEDs[4] = (playerScore - 320*binaryScoreLEDs[5]) / 160;
+      binaryScoreLEDs[3] = (playerScore - 320*binaryScoreLEDs[5] - 160*binaryScoreLEDs[4]) / 80;
+      binaryScoreLEDs[2] = (playerScore - 320*binaryScoreLEDs[5] - 160*binaryScoreLEDs[4] - 80*binaryScoreLEDs[3]) / 40;
+      binaryScoreLEDs[1] = (playerScore - 320*binaryScoreLEDs[5] - 160*binaryScoreLEDs[4] - 80*binaryScoreLEDs[3] - 40*binaryScoreLEDs[2]) / 20;
+      binaryScoreLEDs[0] = (playerScore - 320*binaryScoreLEDs[5] - 160*binaryScoreLEDs[4] - 80*binaryScoreLEDs[3] - 40*binaryScoreLEDs[2] - 20*binaryScoreLEDs[1]) / 10;
     }
-    // And we get the last dot to get more and more blue, as the score goes up
-    if(columnIterator == LEDSon) {
-      LEDMatrix[0][columnIterator] = lastLed;
-    }   
+    for(byte columnIterator = 0; columnIterator < 6; columnIterator++) {
+      // We plot red dots to create the right binary number
+      LEDMatrix[0][columnIterator] = Red * binaryScoreLEDs[columnIterator];
+    }
   }
 }
 
 
-void addLineTopMatrix(byte newLine[6]) {
-  // Create a new line in top of the existing matrix, with the passed argument.
+void addLineTopMatrix() {
+  // Create a new line in top of the existing matrix
   for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
     LEDMatrix[1][columnIterator] = newLine[columnIterator];
   }
