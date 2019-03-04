@@ -242,7 +242,7 @@ void setup() {
 
 
 /* 
-Add star feedback when crashing a wall
+Add star feedback when crashing a wall (test comment)
 Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it
