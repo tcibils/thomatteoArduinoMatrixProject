@@ -399,7 +399,7 @@ void createNewLine() {
       }
     }
     // If the player is lucky and game mode is normal, then a star will appear on the new line
-    if(random(averageLinesApparitionStar+1) == averageLinesApparitionStar && gameStatus == 0) {
+    if(gameStatus == 0 && random(averageLinesApparitionStar+1) == averageLinesApparitionStar) {
       newLine[random(displayNumberOfColumns)] = Star;
     }
     ticker = blockedSpacesCounter + 1;
