@@ -11,7 +11,7 @@
 
 // LED MATRIX CODE
 #define displayNumberOfRows 10                          // Number of rows
-#define displayNumberOfColumns 6                       // Number of coumns
+#define displayNumberOfColumns 6                       // Number of columns
 #define NUM_LEDS displayNumberOfRows * displayNumberOfColumns // Number of LEDs
 
 CRGB leds[NUM_LEDS];                                          // Defining leds table for FastLed
@@ -206,10 +206,11 @@ const byte wallCrashPointsWhileStar = 5;
 // ---------------------------------------------
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
+byte newLine[displayNumberOfColumns] = {0,0,0,0,0,0};       // The new line that will be added at each iteration
 byte starDuration = initialStarDuration;                    // Duration left for the star.
 unsigned int playerScore = initialPlayerScore;              // Will count the number of lines the player passed (points), and display it at end of the game
 unsigned int playerAdvancement = initialPlayerAdvancement;  // Will be like the player score but not exactly. Will not be increased when under a star effect. We'll use this to augment game difficulty.
-
+  
 unsigned int screenMoves = frameRateT[0];                   // In miliseconds, how fast will the car go. That will be updated during the game.
 byte probaApparitionLigne = probaApparitionLigneT[0];       // Probability of a new line appearing when possible
 byte probaApparitionBlock = probaApparitionBlockT[0];       // For a new line, for each block, the probability of it being a "wall"
@@ -260,36 +261,8 @@ void loop() {
     if(millis() - lastMillis > screenMoves) {
     
       changeCarPosition();
-    
-      // We create the new line we'll put on top of our game
-      byte newLine[6] = {0,0,0,0,0,0};
-      
-      // If the ticker is 0, meaning we can create a new line with blocks
-      if(ticker == 0) {
-        // We'll check how many blocks we create
-        byte blockedSpacesCounter = 0;
-        // We have a proba to pop a new line or not
-        if(random(100) < probaApparitionLigne) {
-          byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
-          // And we try to generate blocks
-          for(byte counter = 0; counter < 6; counter++) {
-            // Each having a random proba of appearing
-              if(random(100) < probaApparitionBlock && freePassage != counter) {
-                newLine[counter] = Wall;
-                blockedSpacesCounter++;
-            }
-          }
-        }
-        // If the player is lucky, then a star will appear on the new line
-        if(random(averageLinesApparitionStar+1) == averageLinesApparitionStar) {
-          newLine[random(6)] = Star;
-        }
-        ticker = blockedSpacesCounter + 1;
-      }
 
-      if(ticker > 0) {
-        ticker--;
-      }
+      createNewLine();
 
       lastMillis = millis();
       leftButtonPushed = 0;
@@ -312,40 +285,13 @@ void loop() {
   // The player got a star !
   if(gameStatus == 2) {
     if(starDuration > 0) {
-      screenMoves = frameRateStar;
-      probaApparitionLigne = probaApparitionLigneStar;
-      probaApparitionBlock = probaApparitionBlockStar;
   
       // Every x miliseconds, we make an iteration.
       if(millis() - lastMillis > screenMoves) {
       
         changeCarPosition();
-      
-        // We create the new line we'll put on top of our game
-        byte newLine[6] = {0,0,0,0,0,0};
-        
-        // If the ticker is 0, meaning we can create a new line with blocks
-        if(ticker == 0) {
-          // We'll check how many blocks we create
-          byte blockedSpacesCounter = 0;
-          // We have a proba to pop a new line or not
-          if(random(100) < probaApparitionLigne) {
-            byte freePassage = random(6); // This will enforce that there's always be at least one free passge in the line.
-            // And we try to generate blocks
-            for(byte counter = 0; counter < 6; counter++) {
-              // Each having a random proba of appearing
-                if(random(100) < probaApparitionBlock && freePassage != counter) {
-                  newLine[counter] = Wall;
-                  blockedSpacesCounter++;
-              }
-            }
-          }
-          ticker = blockedSpacesCounter + 1;
-        }
-      
-        if(ticker > 0) {
-          ticker--;
-        }
+
+        createNewLine();
         
         lastMillis = millis();
         leftButtonPushed = 0;
@@ -389,9 +335,14 @@ void loop() {
   delay(1);
 }
 
+
+// -------------------
+// ALL FUNCTIONS BELOW
+// -------------------
+
 // Makes the whole "LEDMatrix" equals to 0, i.e. each LED is off
 void clearLEDMatrix() {
-  // Just seting le LEDmatrix to Wall
+  // Just setting le LEDMatrix to Wall
   for (byte i = 0; i < displayNumberOfRows; i++)  {
     for (byte j = 0; j < displayNumberOfColumns; j++) {
       LEDMatrix[i][j] = Black;
@@ -400,7 +351,7 @@ void clearLEDMatrix() {
 }
 
 void changeCarPosition() {
-    // If the button "left" has been pushed, then the car goes left one column
+  // If the button "left" has been pushed, then the car goes left one column
   if(leftButtonPushed == 1) {
     if(carPosition > 0) {
       carPosition--;
@@ -412,6 +363,40 @@ void changeCarPosition() {
     if(carPosition <5) {
       carPosition++;
     }
+  }
+}
+
+void createNewLine() {
+  // We reset the new line we'll put on top of our game
+  for (byte i = 0; i < displayNumberOfColumns; i++)  {
+    newLine[i] = 0;
+  }
+    
+  // If the ticker is 0, meaning we can create a new line with blocks
+  if(ticker == 0) {
+    // We'll check how many blocks we create
+    byte blockedSpacesCounter = 0;
+    // We have a proba to pop a new line or not
+    if(random(100) < probaApparitionLigne) {
+      byte freePassage = random(displayNumberOfColumns); // This will enforce that there's always be at least one free passage in the line.
+      // And we try to generate blocks
+      for(byte counter = 0; counter < displayNumberOfColumns; counter++) {
+        // Each having a random proba of appearing
+          if(random(100) < probaApparitionBlock && freePassage != counter) {
+            newLine[counter] = Wall;
+            blockedSpacesCounter++;
+        }
+      }
+    }
+    // If the player is lucky and game mode is normal, then a star will appear on the new line
+    if(random(averageLinesApparitionStar+1) == averageLinesApparitionStar && gameStatus == 0) {
+      newLine[random(displayNumberOfColumns)] = Star;
+    }
+    ticker = blockedSpacesCounter + 1;
+  }
+
+  if(ticker > 0) {
+    ticker--;
   }
 }
 
@@ -601,26 +586,51 @@ void pushLinesDown() {
   // Getting each line down by one bit
   for(byte rowIterator = 0; rowIterator < displayNumberOfRows - 2; rowIterator++) {
     for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
-      LEDMatrix[9-rowIterator][columnIterator] = LEDMatrix[9-rowIterator-1][columnIterator];
+      LEDMatrix[displayNumberOfRows-1-rowIterator][columnIterator] = LEDMatrix[displayNumberOfRows-1-rowIterator-1][columnIterator];
     }
   }
 }
 
 void checkCarCrashOrStar() {
   // We check if the car hit something or got the star, or in star mode check if the car crashes a wall and add 5 points
-  if(gameStatus == 0 && LEDMatrix[9][carPosition] != Black && LEDMatrix[9][carPosition] != Star) {
-    gameStatus = 1;   // Meaning game over
+  if(gameStatus == 0 && LEDMatrix[displayNumberOfRows-1][carPosition] != Black && LEDMatrix[displayNumberOfRows-1][carPosition] != Star) {
+    gameStatus = 1;   // Meaning we change the mode to game over
   }    
-  if(gameStatus == 0 && LEDMatrix[9][carPosition] == Star) {
-    gameStatus = 2;   // Meaning star mode on
+  if(gameStatus == 0 && LEDMatrix[displayNumberOfRows-1][carPosition] == Star) {
+    gameStatus = 2;   // Meaning we change the mode to star mode
+    screenMoves = frameRateStar;
+    probaApparitionLigne = probaApparitionLigneStar;
+    probaApparitionBlock = probaApparitionBlockStar;
   }
-  if(gameStatus == 2 && LEDMatrix[9][carPosition] != Black) {
-    playerScore = playerScore + wallCrashPointsWhileStar;
+  if(gameStatus == 2 && LEDMatrix[displayNumberOfRows-1][carPosition] != Black) {
+    playerScore = playerScore + wallCrashPointsWhileStar; // Meaning we add some extra points because a wall was crushed
+    showCarCrashingWall();
   }
 }
 
 void showCar() {
-   LEDMatrix[9][carPosition] = Car;
+   LEDMatrix[displayNumberOfRows-1][carPosition] = Car;
+}
+
+void showCarCrashingWall() {
+  // We check the car horizontal position and then show a crash light all around it
+  if(carPosition > 0 && carPosition < displayNumberOfColumns) {
+    LEDMatrix[displayNumberOfRows-1][carPosition-1] = Yellow;
+    LEDMatrix[displayNumberOfRows-1][carPosition+1] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition-1] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition+1] = Yellow;
+  }
+  if(carPosition == 0) {
+    LEDMatrix[displayNumberOfRows-1][carPosition+1] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition+1] = Yellow;
+  }
+  if(carPosition == displayNumberOfColumns) {
+    LEDMatrix[displayNumberOfRows-1][carPosition-1] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition] = Yellow;
+    LEDMatrix[displayNumberOfRows-2][carPosition-1] = Yellow;
+  }
 }
 
 void displayScoreInGame() {
