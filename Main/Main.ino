@@ -192,11 +192,11 @@ byte playerSelectLettersTable[2][5][5] {
 };
 
 byte playerSelectHighlight[5][1] {
+  {0},
   {1},
   {1},
   {1},
-  {1},
-  {1}
+  {0}
 };
 
 
@@ -313,8 +313,13 @@ void loop() {
     if(aButtonPushed == 1) {
       playerSelected = playerSelectIndicator;
       aButtonPushed = 0;
+      
       // We start the game.
       gameStatus = 2;
+      
+      // We clear the LED Matrix
+      clearLEDMatrix(); // Digitally
+      outputDisplay();  // And physically
     }
   }
 
@@ -341,7 +346,7 @@ void loop() {
     }
   }
 
-  // The player got a star !
+  // The player got a star!
   if(gameStatus == 3) {
     if(starDuration > 0) {
   
@@ -866,7 +871,7 @@ void displayPlayerSelect() {
     }
   }
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
-    // White if playerSelectIndicator == 0 and Black if playerSelectIndicator == 1
+    // Red if playerSelectIndicator == 0 and Black if playerSelectIndicator == 1
     for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
          LEDMatrix[rowIterator][columnIterator] = ( Red * ((playerSelectIndicator+1)%2) + Black * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator][columnIterator-5];  
     }
@@ -878,7 +883,7 @@ void displayPlayerSelect() {
     }
   }
   for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
-    // Black if playerSelectIndicator == 0 and White if playerSelectIndicator == 1
+    // Black if playerSelectIndicator == 0 and Green if playerSelectIndicator == 1
     for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
          LEDMatrix[rowIterator][columnIterator] = ( Black * ((playerSelectIndicator+1)%2) + Green * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator-5][columnIterator-5];  
     }
@@ -902,6 +907,6 @@ void reinitializeGame() {
   gameStatus = 2;
 
   // We clear the LED Matrix
-  clearLEDMatrix(); // Digitaly
+  clearLEDMatrix(); // Digitally
   outputDisplay();  // And physically
 }
