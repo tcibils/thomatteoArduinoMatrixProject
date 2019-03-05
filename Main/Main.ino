@@ -97,6 +97,7 @@ unsigned int lastBButtonValue = LOW;
 byte leftButtonPushed = 0;
 byte rightButtonPushed = 0;
 byte upButtonPushed = 0;
+byte downButtonPushed = 0;
 byte aButtonPushed = 0;
 byte bButtonPushed = 0;
 
@@ -173,6 +174,31 @@ byte numberTable[10][5][3] {
 }
 };
 
+byte playerSelectLettersTable[2][5][5] {
+{
+  {1,0,0,0,1},
+  {1,1,0,1,1},
+  {1,0,1,0,1},
+  {1,0,0,0,1},
+  {1,0,0,0,1}
+},
+{
+  {0,1,0,0,0},
+  {0,1,0,0,0},
+  {0,1,0,0,0},
+  {0,1,0,0,0},
+  {0,1,1,1,0}
+}
+};
+
+byte playerSelectHighlight[5][1] {
+  {1},
+  {1},
+  {1},
+  {1},
+  {1}
+};
+
 
 const byte gamePadMode = 0;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
 
@@ -204,9 +230,11 @@ const byte wallCrashPointsWhileStar = 10;
 // ---------------------------------------------
 // ----------- MODIFIED GAME VARIABLES ---------
 // ---------------------------------------------
-byte gameStatus = 0;                                        // 0 means we're playing, 1 means it's game over, 2 means the player got a star
+byte gameStatus = 1;                                        // 0 means it's game over, 1 means it's player select mode, 2 means we're playing, 3 means player got a star
 byte scoreDisplayMode = 1;                                  // 0 means using a decimal score display mode (100-200-300...600), 1 means using a binary score display mode (10-20-40..320)
 byte carPosition = initialCarPosition;                      // Car position on the bootom line of the LED matrix (so the column)
+byte playerSelectIndicator = 0;                             // 0 means you're selecting Mario, 1 means you're selecting Luigi
+byte playerSelected = 0;                                    // 0 means it's Mario, 1 means it's Luigi
 byte ticker = initialTicker;                                // Once the ticker is 0, we generate a new line randomly on top of the matrix. It dicreases every "turn".
 byte newLine[displayNumberOfColumns] = {0,0,0,0,0,0};       // The new line that will be added at each iteration
 byte starDuration = initialStarDuration;                    // Duration left for the star.
@@ -249,7 +277,7 @@ void setup() {
 ---FLash walls when Star mode => Done, I guess. Faut tester!
 ---Add alternative score mode in binary => Done, I guess. Faut tester!
 ---Add a way to toggle score mode by pressing up button in game => Done, I guess. Faut tester!
-upButton not working?
+---Add player select mode => Done, I guess. Faut tester!
 bButton not working?
 Add star music
 Make the matrix size abstract
@@ -258,6 +286,7 @@ Music ?
 
 Bugs corrigés:
 ---Mort avec un mur juste à la fin de l'étoile... -> augmenté ticker après étoile... => Done, I guess. Faut tester!
+---Diode reste rouge quand on passe de binary à décimal => Done, I guess. Faut tester!
 Autre:
 ---Réduire fréquence murs avec étoile mais pas largeur murs => Done. Faut tester si c'est toujours bien pour l'utilisateur!
 */
@@ -265,7 +294,32 @@ Autre:
 
 void loop() {
 
-  if(gameStatus == 0) {
+  // If it's player select mode
+  if(gameStatus == 1) {
+    // We update the LED matrix with the player select mode
+    displayPlayerSelect();
+
+    // If the player has pushed up
+    if(upButtonPushed == 1) {
+      playerSelectIndicator = (playerSelectIndicator+1)%2;
+      upButtonPushed = 0;
+    }
+    // If the player has pushed down
+    if(downButtonPushed == 1) {
+      playerSelectIndicator = (playerSelectIndicator+1)%2;
+      downButtonPushed = 0;
+    }
+    // If the player has pushed A
+    if(aButtonPushed == 1) {
+      playerSelected = playerSelectIndicator;
+      aButtonPushed = 0;
+      // We start the game.
+      gameStatus = 2;
+    }
+  }
+
+
+  if(gameStatus == 2) {
     
     setGameParameters();
     
@@ -277,7 +331,7 @@ void loop() {
       pushLinesDown();
       checkCarCrashOrStar();
 
-      if(gameStatus == 0) {
+      if(gameStatus == 2) {
         showCar();
         changeScoreDisplayMode();
         displayScoreInGame();
@@ -289,7 +343,7 @@ void loop() {
   }
 
   // The player got a star !
-  if(gameStatus == 2) {
+  if(gameStatus == 3) {
     if(starDuration > 0) {
   
       // Every x miliseconds, we make an iteration.
@@ -311,13 +365,13 @@ void loop() {
       ticker = displayNumberOfRows; // Before star is over, give a full screen of empty rows
     }
     if(starDuration == 0) {
-      gameStatus = 0;
+      gameStatus = 2;
       starDuration = initialStarDuration;
     }
   }
 
   // If it's game over
-  if(gameStatus == 1) {
+  if(gameStatus == 0) {
     // We update the LED matrix with the player score
     displayScore();
 
@@ -327,7 +381,6 @@ void loop() {
       bButtonPushed = 0;
       // We re-initialize the game.
       reinitializeGame();
-      gameStatus = 0;
     }
   }
     
@@ -392,7 +445,7 @@ void createNewLine() {
       }
     }
     // If the player is lucky and game mode is normal, then a star will appear on the new line
-    if(gameStatus == 0 && random(averageLinesApparitionStar+1) == averageLinesApparitionStar) {
+    if(gameStatus == 2 && random(averageLinesApparitionStar+1) == averageLinesApparitionStar) {
       newLine[random(displayNumberOfColumns)] = Star;
     }
     ticker = blockedSpacesCounter + 1;
@@ -450,13 +503,13 @@ void checkButtons() {
      
     /* Affiche l'état de chaque bouton */
     if(btns & BTN_A) {
-      if(gameStatus == 1) {
+      if(gameStatus == 0 || gameStatus == 1) {
         aButtonPushed = 1;
       }
     }
         
     if(btns & BTN_B){
-      if(gameStatus == 1) {
+      if(gameStatus == 0 || gameStatus == 1) {
         bButtonPushed = 1;
       }
     }
@@ -482,15 +535,17 @@ void checkButtons() {
     else
       Serial.print(F("----- "));
    
-    if(btns & BTN_DOWN)
-      Serial.print(F("DOWN "));
-    else
-      Serial.print(F("---- "));
    */
     if(btns & BTN_UP) {
       upButtonPushed = 1;
+      downButtonPushed = 0;
     }
-   
+    
+    if(btns & BTN_DOWN) {
+      downButtonPushed = 1;
+      upButtonPushed = 0;
+    }
+    
     if(btns & BTN_LEFT) {
       leftButtonPushed = 1;
       rightButtonPushed = 0;
@@ -522,7 +577,7 @@ void checkButtons() {
     // Left and right are only used while playing or with the star
     leftButtonValue = analogRead(leftButton);
     if (leftButtonValue < 200 && lastLeftButtonValue > 800) {
-      if(gameStatus == 0 || gameStatus == 2) {
+      if(gameStatus == 2 || gameStatus == 3) {
         leftButtonPushed = 1;
         rightButtonPushed = 0;
       }
@@ -531,26 +586,34 @@ void checkButtons() {
   
     rightButtonValue = analogRead(rightButton);
     if (rightButtonValue < 200 && lastRightButtonValue > 800) { 
-      if(gameStatus == 0 || gameStatus == 2) {
+      if(gameStatus == 2 || gameStatus == 3) {
         leftButtonPushed = 0;
         rightButtonPushed = 1;
       }
     }
     lastRightButtonValue = rightButtonValue; // And we update what we read just after
 
-    // Up is used to Change the Score Display Mode from decimal (100-200-300...600) to binary (10-20-40...320)
+    // Up is used to Change the Score Display Mode from decimal (100-200-300...600) to binary (10-20-40...320), and Up and Down are used to change the selected player
     upButtonValue = analogRead(upButton);
     if (upButtonValue < 200 && lastUpButtonValue > 800) { 
-      if(gameStatus == 0 || gameStatus == 2) {
+      if(gameStatus == 1 || gameStatus == 2 || gameStatus == 3) {
         upButtonPushed = 1;
       }
     }
     lastUpButtonValue = upButtonValue; // And we update what we read just after
+
+    downButtonValue = analogRead(downButton);
+    if (downButtonValue < 200 && lastDownButtonValue > 800) { 
+      if(gameStatus == 1) {
+        downButtonPushed = 1;
+      }
+    }
+    lastDownButtonValue = downButtonValue; // And we update what we read just after
   
-    // A and B buttons are only used if we're in game over, to restart the game.
+    // A and B buttons are only used if we're in game over, to restart the game, and A is also used to select the player
     aButtonValue = analogRead(aButton);
     if (aButtonValue < 200 && lastAButtonValue > 800) { 
-      if(gameStatus == 1) {
+      if(gameStatus == 0 || gameStatus == 1) {
         aButtonPushed = 1;
       }
     }
@@ -558,7 +621,7 @@ void checkButtons() {
   
     bButtonValue = analogRead(bButton);
     if (bButtonValue < 200 && lastBButtonValue > 800) { 
-      if(gameStatus == 1) {
+      if(gameStatus == 0) {
         bButtonPushed = 1;
       }
     }
@@ -604,16 +667,16 @@ void pushLinesDown() {
 
 void checkCarCrashOrStar() {
   // We check if the car hit something or got the star, or in star mode check if the car crashes a wall and add 5 points
-  if(gameStatus == 0 && LEDMatrix[displayNumberOfRows-1][carPosition] != Black && LEDMatrix[displayNumberOfRows-1][carPosition] != Star) {
-    gameStatus = 1;   // Meaning we change the mode to game over
+  if(gameStatus == 2 && LEDMatrix[displayNumberOfRows-1][carPosition] != Black && LEDMatrix[displayNumberOfRows-1][carPosition] != Star) {
+    gameStatus = 0;   // Meaning we change the mode to game over
   }    
-  if(gameStatus == 0 && LEDMatrix[displayNumberOfRows-1][carPosition] == Star) {
-    gameStatus = 2;   // Meaning we change the mode to star mode
+  if(gameStatus == 2 && LEDMatrix[displayNumberOfRows-1][carPosition] == Star) {
+    gameStatus = 3;   // Meaning we change the mode to star mode
     screenMoves = frameRateStar;
     probaApparitionLigne = probaApparitionLigneStar;
     probaApparitionBlock = probaApparitionBlockStar;
   }
-  if(gameStatus == 2 && LEDMatrix[displayNumberOfRows-1][carPosition] == Wall) {
+  if(gameStatus == 3 && LEDMatrix[displayNumberOfRows-1][carPosition] == Wall) {
     playerScore = playerScore + wallCrashPointsWhileStar; // Meaning we add some extra points because a wall was crushed
     showCarCrashingWall();
   }
@@ -649,6 +712,10 @@ void changeScoreDisplayMode() {
   if(upButtonPushed == 1) {
     scoreDisplayMode = (scoreDisplayMode+1)%2;
     upButtonPushed = 0;
+    for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
+      // We reset the score line to all black
+      LEDMatrix[0][columnIterator] = Black;
+    } 
   }
 }
 
@@ -686,7 +753,6 @@ void displayScoreInGame() {
   }
 }
 
-
 void addLineTopMatrix() {
   // Create a new line in top of the existing matrix
   for(byte columnIterator = 0; columnIterator < displayNumberOfColumns; columnIterator++) {
@@ -704,14 +770,14 @@ void outputDisplay() {
       if(columnIndex%2 == 0) {
         
         if(LEDMatrix[rowIndex][columnIndex] == Black)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Black;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 0)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2 && playerScore%2 == 0)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2 && playerScore%2 == 1)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 3)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == White)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 0)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 1)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 3)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
@@ -721,14 +787,14 @@ void outputDisplay() {
       // If we're on an uneven column, we do a mathematical trick to invert it
       else if(columnIndex%2 == 1) {
         if(LEDMatrix[rowIndex][columnIndex] == Black) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Black;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2 && playerScore%2 == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2 && playerScore%2 == 1) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
+        if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 3) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == White) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
-        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 1) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
+        if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 3) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
@@ -790,6 +856,38 @@ void displayScore() {
   outputDisplay();
 }
 
+void displayPlayerSelect() {
+  
+  clearLEDMatrix();
+
+  for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
+    // Red if playerSelectIndicator == 0 and White if playerSelectIndicator == 1
+    for(byte columnIterator = 0; columnIterator < 5; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = ( Red * ((playerSelectIndicator+1)%2) + White * (playerSelectIndicator%2) ) * playerSelectLettersTable[0][rowIterator][columnIterator];  
+    }
+  }
+  for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
+    // White if playerSelectIndicator == 0 and Black if playerSelectIndicator == 1
+    for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = ( White * ((playerSelectIndicator+1)%2) + Black * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator][columnIterator-5];  
+    }
+  }
+  for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
+    // White if playerSelectIndicator == 0 and Green if playerSelectIndicator == 1
+    for(byte columnIterator = 0; columnIterator < 5; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = ( White * ((playerSelectIndicator+1)%2) + Green * (playerSelectIndicator%2) ) * playerSelectLettersTable[1][rowIterator-5][columnIterator];  
+    }
+  }
+  for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
+    // Black if playerSelectIndicator == 0 and White if playerSelectIndicator == 1
+    for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
+         LEDMatrix[rowIterator][columnIterator] = ( Black * ((playerSelectIndicator+1)%2) + White * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator-5][columnIterator-5];  
+    }
+  }
+
+  outputDisplay();
+}
+
 void reinitializeGame() {
   // We repass modified game variables to their initial positions
   carPosition = initialCarPosition;
@@ -802,7 +900,7 @@ void reinitializeGame() {
   probaApparitionBlock = probaApparitionBlockT[0];   // For a new line, for each block, the probability of it being a "wall"
 
   // We set the game status to "play"
-  gameStatus = 0;
+  gameStatus = 2;
 
   // We clear the LED Matrix
   clearLEDMatrix(); // Digitaly
