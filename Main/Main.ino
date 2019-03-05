@@ -216,10 +216,10 @@ unsigned const int intervalesT[gameParametersTablesSize] =   {0,   50,  100, 150
 unsigned const int frameRateT[gameParametersTablesSize] =    {250, 200, 150, 100, 100, 100, 100, 100, 100, 100, 100};
 const byte probaApparitionLigneT[gameParametersTablesSize] = {80,  70,  60,  50,  50,  60,  70,  80,  90,  90,  90};
 const byte probaApparitionBlockT[gameParametersTablesSize] = {70,  60,  50,  40,  40,  40,  50,  60,  70,  80,  90};
-const byte averageLinesApparitionStar = 60;      // How many lines in average before a star appears
+const byte averageLinesApparitionStar = 50;      // How many lines in average before a star appears
 const byte frameRateStar = 70;
-const byte probaApparitionLigneStar = 20;
-const byte probaApparitionBlockStar = 40;
+const byte probaApparitionLigneStar = 50;
+const byte probaApparitionBlockStar = 20;
 const byte wallCrashPointsWhileStar = 10;
 
 // We will check the player advancement, and locate ourselves in the interval table defined
@@ -317,7 +317,6 @@ void loop() {
       gameStatus = 2;
     }
   }
-
 
   if(gameStatus == 2) {
     
@@ -869,7 +868,7 @@ void displayPlayerSelect() {
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
     // White if playerSelectIndicator == 0 and Black if playerSelectIndicator == 1
     for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = ( White * ((playerSelectIndicator+1)%2) + Black * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator][columnIterator-5];  
+         LEDMatrix[rowIterator][columnIterator] = ( Red * ((playerSelectIndicator+1)%2) + Black * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator][columnIterator-5];  
     }
   }
   for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
@@ -881,7 +880,7 @@ void displayPlayerSelect() {
   for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
     // Black if playerSelectIndicator == 0 and White if playerSelectIndicator == 1
     for(byte columnIterator = 5; columnIterator < 6; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = ( Black * ((playerSelectIndicator+1)%2) + White * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator-5][columnIterator-5];  
+         LEDMatrix[rowIterator][columnIterator] = ( Black * ((playerSelectIndicator+1)%2) + Green * (playerSelectIndicator%2) ) * playerSelectHighlight[rowIterator-5][columnIterator-5];  
     }
   }
 
