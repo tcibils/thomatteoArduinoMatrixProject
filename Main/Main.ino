@@ -50,13 +50,13 @@ byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
 
 // Original colours for leds.
 const byte Black = 0;
-const byte Wall = 1;
 const byte White = 1;
+const byte Wall = 1;
 const byte Blue = 2;
 const byte Red = 3;
 const byte Green = 4;
-const byte Star = 5;
 const byte Yellow = 5;
+const byte Star = 5;
 const byte Car = 6;
 
 
@@ -287,6 +287,8 @@ Music ?
 Bugs corrigés:
 ---Mort avec un mur juste à la fin de l'étoile... -> augmenté ticker après étoile... => Done, I guess. Faut tester!
 ---Diode reste rouge quand on passe de binary à décimal => Done, I guess. Faut tester!
+---Start of game crashes into "M" because screen wasn't cleaned up => Done, I guess. Faut tester!
+---Couleurs devraient marcher comme attendu (murs jaunes quand étoile, score final en rouge et blanc) => Done, I guess. Faut tester!
 Autre:
 ---Réduire fréquence murs avec étoile mais pas largeur murs => Done. Faut tester si c'est toujours bien pour l'utilisateur!
 */
@@ -774,34 +776,34 @@ void outputDisplay() {
       if(columnIndex%2 == 0) {
         
         if(LEDMatrix[rowIndex][columnIndex] == Black)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Black;}
+        if(LEDMatrix[rowIndex][columnIndex] == White)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 3)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == White)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Green)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue)   {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Blue;}
+        if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Green)  {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
+        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 0)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 1)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 3)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == Red)    {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Red;}
-        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1] = CRGB::Yellow;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 6)     {leds[(columnIndex + 1)*displayNumberOfRows - rowIndex - 1].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
       }
       // If we're on an uneven column, we do a mathematical trick to invert it
       else if(columnIndex%2 == 1) {
         if(LEDMatrix[rowIndex][columnIndex] == Black) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Black;}
+        if(LEDMatrix[rowIndex][columnIndex] == White) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 2) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
         if(LEDMatrix[rowIndex][columnIndex] == Wall && gameStatus == 3) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == White) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::White;}
-        if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Blue) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Blue;}
+        if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
+        if(LEDMatrix[rowIndex][columnIndex] == Green) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
+        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
+        if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 0) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 2 && playerSelected == 1) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Green;}
         if(LEDMatrix[rowIndex][columnIndex] == Car && gameStatus == 3) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == Red) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Red;}
-        if(LEDMatrix[rowIndex][columnIndex] == Yellow) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
-        if(LEDMatrix[rowIndex][columnIndex] == Star) {leds[columnIndex*displayNumberOfRows + rowIndex] = CRGB::Yellow;}
         // If we're above it, then we make the diod goes up and up in blue for the score. The rainbow before it is wanted as a "checkpoint"
         if(LEDMatrix[rowIndex][columnIndex] > 6)     {leds[columnIndex*displayNumberOfRows + rowIndex].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
       }
@@ -838,7 +840,7 @@ void displayScore() {
 
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
     for(byte columnIterator = 0; columnIterator < 3; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = Green * numberTable[thousands][rowIterator][columnIterator];  
+         LEDMatrix[rowIterator][columnIterator] = White * numberTable[thousands][rowIterator][columnIterator];  
     }
   }
   for(byte rowIterator = 0; rowIterator < 5; rowIterator++) {
@@ -853,7 +855,7 @@ void displayScore() {
   }
   for(byte rowIterator = 5; rowIterator < 10; rowIterator++) {
     for(byte columnIterator = 3; columnIterator < 6; columnIterator++) {
-         LEDMatrix[rowIterator][columnIterator] = Green * numberTable[units][rowIterator-5][columnIterator-3];  
+         LEDMatrix[rowIterator][columnIterator] = White * numberTable[units][rowIterator-5][columnIterator-3];  
     }
   }
 
