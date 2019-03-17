@@ -34,18 +34,7 @@ CRGB leds[NUM_LEDS];                                          // Defining leds t
 
 // LED Matrix
 // Position 0, 0 is on top left
-byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns] = {
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0}
-};
+byte LEDMatrix[displayNumberOfRows][displayNumberOfColumns];
 
 
 // Original colours for leds.
@@ -252,7 +241,9 @@ void setup() {
 
   // Set matrix pins to output
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-
+  // Initiallizing Digital LED Matrix
+  clearLEDMatrix();
+  
   // Set button pins to input
   pinMode(leftButton, INPUT);
   pinMode(upButton, INPUT);
