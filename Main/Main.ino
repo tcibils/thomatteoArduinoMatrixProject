@@ -421,7 +421,7 @@ void changeCarPosition() {
 
   // If the button "right" has been pushed, then the car goes right one column
   if(rightButtonPushed == 1) {
-    if(carPosition <5) {
+    if(carPosition <displayNumberOfColumns-1) {
       carPosition++;
       rightButtonPushed = 0;
     }
