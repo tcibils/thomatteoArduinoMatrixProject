@@ -264,24 +264,11 @@ void setup() {
 
 
 /* 
----Add star feedback when crashing a wall => Done, I guess. Faut tester!
----FLash walls when Star mode => Done, I guess. Faut tester!
----Add alternative score mode in binary => Done, I guess. Faut tester!
----Add a way to toggle score mode by pressing up button in game => Done, I guess. Faut tester!
----Add player select mode => Done, I guess. Faut tester!
 bButton not working?
 Add star music
 Make the matrix size abstract
 Game is impossible in certain cases : central wall, player choses the wrong path, and takes an impossible wall after it => Ca m'a l'air méga chaud à résoudre
 Music ?
-
-Bugs corrigés:
----Mort avec un mur juste à la fin de l'étoile... -> augmenté ticker après étoile... => Done, I guess. Faut tester!
----Diode reste rouge quand on passe de binary à décimal => Done, I guess. Faut tester!
----Start of game crashes into "M" because screen wasn't cleaned up => Done, I guess. Faut tester!
----Couleurs devraient marcher comme attendu (murs jaunes quand étoile, score final en rouge et blanc) => Done, I guess. Faut tester!
-Autre:
----Réduire fréquence murs avec étoile mais pas largeur murs => Done. Faut tester si c'est toujours bien pour l'utilisateur!
 */
 
 
