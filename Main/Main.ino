@@ -54,8 +54,8 @@ const byte Car = 6;
 #define upButton A4          // Input pin for button Up
 #define rightButton A3       // Input pin for button Right
 #define downButton A2        // Input pin for button Down
-#define aButton A0           // Input pin for button A
-#define bButton A1           // Input pin for button B
+#define aButton A1           // Input pin for button A
+#define bButton A0           // Input pin for button B
 
 static const byte PIN_LATCH = 2;
 static const byte PIN_CLOCK = 3;
