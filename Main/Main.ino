@@ -1,7 +1,6 @@
 /* 
  *  
- *  Creator : Thomas Cibils
- *  Last update : 05.02.2019
+ *  Creator : Thomas Cibils & Matteo Raviglione
  *  FastLED tuto : https://github.com/FastLED/FastLED/wiki/Basic-usage - used for WS2812B 5050 RGB LED Strip 5M 150 300 Leds 144 60LED/M Individual Addressable 5V
  *  */
 
