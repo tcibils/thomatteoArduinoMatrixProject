@@ -22,10 +22,10 @@
 CRGB leds[quantityOfSingleMatrixDisplay][SINGLE_NUM_LEDS];
 
 // And their respective data pins
-#define LEDSONE_DATA_PIN 2                                            // Output pin for FastLed
-#define LEDSTWO_DATA_PIN 3                                            // Output pin for FastLed
-#define LEDSTHREE_DATA_PIN 4                                            // Output pin for FastLed
-#define LEDSFOUR_DATA_PIN 5                                            // Output pin for FastLed
+#define LEDSONE_DATA_PIN 2       // Top left
+#define LEDSTWO_DATA_PIN 3       // Top right
+#define LEDSTHREE_DATA_PIN 4     // Bottom left
+#define LEDSFOUR_DATA_PIN 5      // Bottom right
 
 /* Constantes des bits de chaque bouton */
 #define BTN_A 256
@@ -66,9 +66,9 @@ const byte Car = 6;
 #define aButton A1           // Input pin for button A
 #define bButton A0           // Input pin for button B
 
-static const byte PIN_LATCH = 2;
-static const byte PIN_CLOCK = 3;
-static const byte PIN_DATA = 4;
+static const byte PIN_LATCH = 40;
+static const byte PIN_CLOCK = 42;
+static const byte PIN_DATA = 44;
 
 struct pointOnMatrix {
   byte lineCoordinate;
@@ -198,7 +198,7 @@ byte playerSelectHighlight[5][1] {
 };
 
 
-const byte gamePadMode = 0;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
+const byte gamePadMode = 1;                 // 0 means using my home-made gamepad, 1 means using an SNES gamepad
 
 // ---------------------------------------------
 // -------- NON-MODIFIED GAME VARIABLES --------
@@ -702,6 +702,7 @@ void showCarCrashingWall() {
     LEDMatrix[totalDisplayNumberOfRows-2][carPosition] = Yellow;
     LEDMatrix[totalDisplayNumberOfRows-2][carPosition-1] = Yellow;
   }
+  outputDisplay();
   delay(250);
 }
 
@@ -798,7 +799,7 @@ void outputDisplay() {
         // Useful because of the way my matrix is soldered.
         // So we'll invert one column every two compared to our digital matrix
         // If we're on an even column, we're fine, everything is straightfoward
-        if(columnIndex%2 == 0) {
+        if(columnIndex%2 == 1) {
           
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] == Black)  {leds[displayMatrixIndex][(columnIndex + 1)*singleMatrixDisplayNumberOfRows - rowIndex - 1] = CRGB::Black;}
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] == White)   {leds[displayMatrixIndex][(columnIndex + 1)*singleMatrixDisplayNumberOfRows - rowIndex - 1] = CRGB::White;}
@@ -816,7 +817,7 @@ void outputDisplay() {
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] > 6)     {leds[displayMatrixIndex][(columnIndex + 1)*singleMatrixDisplayNumberOfRows - rowIndex - 1].setRGB(2*LEDMatrix[rowIndex][columnIndex]+30,0,0);}
         }
         // If we're on an uneven column, we do a mathematical trick to invert it
-        else if(columnIndex%2 == 1) {
+        else if(columnIndex%2 == 0) {
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] == Black) {leds[displayMatrixIndex][columnIndex*singleMatrixDisplayNumberOfRows + rowIndex] = CRGB::Black;}
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] == White) {leds[displayMatrixIndex][columnIndex*singleMatrixDisplayNumberOfRows + rowIndex] = CRGB::White;}
           if(LEDMatrix[rowIndex + indexRowArtificialIncrement][columnIndex + indexColumnArtificialIncrement] == Wall && gameStatus == 2) {leds[displayMatrixIndex][columnIndex*singleMatrixDisplayNumberOfRows + rowIndex] = CRGB::White;}
