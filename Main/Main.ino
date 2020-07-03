@@ -687,6 +687,10 @@ void showCarCrashingWall() {
     LEDMatrix[displayNumberOfRows-2][carPosition] = Yellow;
     LEDMatrix[displayNumberOfRows-2][carPosition-1] = Yellow;
   }
+
+  outputDisplay();
+  delay(250);
+  
 }
 
 void changeScoreDisplayMode() {
